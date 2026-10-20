@@ -1,0 +1,29 @@
+---
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Archive', href: '/archive/' },
+  { label: 'Tags', href: '/tags/' },
+  { label: 'Gallery', href: '/gallery/' },
+  { label: 'Search', href: '/search/' },
+  { label: 'About', href: '/about/' },
+];
+
+const pathname = Astro.url.pathname;
+const isCurrent = (href: string) => {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(href);
+};
+---
+
+<header class="site-header">
+  <div class="container">
+    <div class="site-header-inner">
+      <a href="/" class="logo" aria-label="Example Journal home">Example Journal</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        {navItems.map((item) => (
+          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+        ))}
+      </nav>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags } = post.data;
+const href = `/blog/${post.id.replace(/\.md$/, '')}/`;
+
+const dateStr = pubDate.toLocaleDateString('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric',
+});
+---
+
+<li class="post-item" data-reveal>
+  <div class="post-meta">
+    <span>{dateStr}</span>
+    {tags.map((tag: string) => (
+      <a href={`/tags/${tag}/`} class="tag">{tag}</a>
+    ))}
+  </div>
+  <h2 class="post-title">
+    <a href={href}>{title}</a>
+  </h2>
+  <p class="post-excerpt">{description}</p>
+</li>
+
+<style>
+  .post-meta .tag {
+    color: var(--accent-bright);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .post-meta .tag:hover {
+    color: var(--accent-gold);
+  }
+
+  .post-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>

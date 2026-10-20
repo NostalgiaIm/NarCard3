@@ -1,0 +1,58 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{items.length > 0 && (
+  <nav class="toc" data-reveal>
+    <div class="toc-title">Contents</div>
+    <ol>
+      {items.map((h) => (
+        <li class={h.depth === 3 ? 'toc-sub' : ''}>
+          <a href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .toc li.toc-sub {
+    padding-left: 24px;
+    font-size: 15px;
+    opacity: 0.8;
+  }
+
+  .toc li.toc-sub::before {
+    content: '—';
+    color: var(--accent-purple);
+    font-size: 10px;
+  }
+</style>
+
+<script>
+  (function () {
+    document.querySelectorAll('.toc a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        if (!href) return;
+        const target = document.querySelector(href);
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.scrollY - 90;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,12 @@
+﻿node_modules/
+dist/
+.astro/
+.vscode/
+*.bak
+*.prev.html
+*.before-final-*.html
+crop_card.js
+*.png
+*.jpg
+*.jpeg
+*.mp3

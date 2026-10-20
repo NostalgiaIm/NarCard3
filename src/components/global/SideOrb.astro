@@ -1,0 +1,118 @@
+---
+interface OrbButton {
+  label: string;
+  href: string;
+  icon: string;
+  action?: string;
+}
+
+interface Props {
+  side: 'left' | 'right';
+}
+
+const { side } = Astro.props;
+
+const leftButtons: OrbButton[] = [
+  { label: 'Home', href: '/', icon: 'home' },
+  { label: 'Archive', href: '/archive/', icon: 'archive' },
+  { label: 'Tags', href: '/tags/', icon: 'tag' },
+  { label: 'Gallery', href: '/gallery/', icon: 'gallery' },
+  { label: 'About', href: '/about/', icon: 'user' },
+];
+
+const rightButtons: OrbButton[] = [
+  { label: 'Search', href: '/search/', icon: 'search' },
+  { label: 'Markdown', href: '/markdown-theme/', icon: 'doc' },
+  { label: 'RSS', href: '/rss.xml', icon: 'rss' },
+  { label: 'Top', href: '#', icon: 'up', action: 'top' },
+  { label: 'Theme', href: '#', icon: 'moon', action: 'theme' },
+];
+
+const buttons = side === 'left' ? leftButtons : rightButtons;
+---
+
+<div class={`side-orb ${side}-orb`} data-side={side} id={`${side}-orb`}>
+  <div class="orb-ring"></div>
+
+  {buttons.map((btn) =>
+    btn.action ? (
+      <button class="orb-btn" data-label={btn.label} data-action={btn.action} aria-label={btn.label}>
+        {btn.icon === 'up' && <span aria-hidden="true">↑</span>}
+        {btn.icon === 'moon' && <span aria-hidden="true">☽</span>}
+      </button>
+    ) : (
+      <a class="orb-btn" data-label={btn.label} href={btn.href} aria-label={btn.label}>
+        {btn.icon === 'home' && <span aria-hidden="true">⌂</span>}
+        {btn.icon === 'archive' && <span aria-hidden="true">☷</span>}
+        {btn.icon === 'tag' && <span aria-hidden="true">#</span>}
+        {btn.icon === 'gallery' && <span aria-hidden="true">▧</span>}
+        {btn.icon === 'user' && <span aria-hidden="true">♙</span>}
+        {btn.icon === 'search' && <span aria-hidden="true">⌕</span>}
+        {btn.icon === 'doc' && <span aria-hidden="true">¶</span>}
+        {btn.icon === 'rss' && <span aria-hidden="true">◔</span>}
+      </a>
+    )
+  )}
+
+  <button class="orb-icon" aria-label={side === 'left' ? '展开导航' : '展开工具'}>
+    {side === 'left' ? <span aria-hidden="true">☾</span> : <span aria-hidden="true">✣</span>}
+  </button>
+</div>
+
+<script>
+  (function () {
+    const radius = window.innerWidth <= 1024 ? 78 : 90;
+    const stepDelay = 50;
+
+    document.querySelectorAll<HTMLElement>('.side-orb').forEach((orb) => {
+      const side = orb.getAttribute('data-side');
+      const buttons = orb.querySelectorAll<HTMLElement>('.orb-btn');
+      const total = buttons.length;
+
+      buttons.forEach((btn, i) => {
+        const t = total > 1 ? i / (total - 1) : 0.5;
+        const angle = side === 'left' ? -60 + 120 * t : 240 - 120 * t;
+        const rad = (angle * Math.PI) / 180;
+        btn.style.setProperty('--tx', (radius * Math.cos(rad)).toFixed(2) + 'px');
+        btn.style.setProperty('--ty', (radius * Math.sin(rad)).toFixed(2) + 'px');
+        btn.style.setProperty('--delay', i * stepDelay + 'ms');
+        btn.style.setProperty('--close-delay', (total - 1 - i) * stepDelay + 'ms');
+      });
+
+      const icon = orb.querySelector<HTMLElement>('.orb-icon');
+      icon?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.side-orb.active').forEach((other) => {
+          if (other !== orb) other.classList.remove('active');
+        });
+        orb.classList.toggle('active');
+      });
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          const action = btn.getAttribute('data-action');
+          if (action === 'top') {
+            event.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (action === 'theme') {
+            event.preventDefault();
+            document.getElementById('themeToggle')?.click();
+          }
+          setTimeout(() => orb.classList.remove('active'), 150);
+        });
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      document.querySelectorAll<HTMLElement>('.side-orb.active').forEach((orb) => {
+        if (!orb.contains(event.target as Node)) orb.classList.remove('active');
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        document.querySelectorAll('.side-orb.active').forEach((orb) => orb.classList.remove('active'));
+      }
+    });
+  })();
+</script>

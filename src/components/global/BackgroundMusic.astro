@@ -1,0 +1,150 @@
+---
+interface Props {
+  src?: string;
+  label?: string;
+}
+
+const {
+  src = '/audio/heibai2-backgroundmusic.mp3',
+  label = 'Music',
+} = Astro.props;
+---
+
+<audio id="bgm" src={src} loop preload="auto"></audio>
+
+<button
+  class="bgm-toggle"
+  id="bgmToggle"
+  type="button"
+  data-label={label}
+  aria-label="播放背景音乐"
+  aria-pressed="false"
+>
+  <svg class="bgm-icon bgm-icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M8.5 5.2v13.6L19 12z" />
+  </svg>
+  <svg class="bgm-icon bgm-icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <rect x="7" y="5.4" width="3.4" height="13.2" rx="1.2" />
+    <rect x="13.6" y="5.4" width="3.4" height="13.2" rx="1.2" />
+  </svg>
+</button>
+
+<style>
+  .bgm-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 80px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(26, 23, 40, 0.92);
+    border: 1px solid var(--border);
+    color: var(--accent-gold);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9001;
+    transition: all 0.4s var(--ease-soft);
+  }
+
+  .bgm-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  .bgm-icon-pause { display: none; }
+  .bgm-toggle.playing .bgm-icon-play { display: none; }
+  .bgm-toggle.playing .bgm-icon-pause { display: block; }
+
+  .bgm-toggle:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(201, 169, 110, 0.3);
+    transform: translateY(-4px);
+  }
+
+  .bgm-toggle.playing {
+    border-color: var(--accent-gold);
+    animation: bgm-breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes bgm-breathe {
+    0%, 100% { box-shadow: 0 0 14px rgba(201, 169, 110, 0.28); }
+    50% { box-shadow: 0 0 26px rgba(201, 169, 110, 0.55); }
+  }
+
+  .bgm-toggle::after {
+    content: attr(data-label);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+    font-family: var(--font-sharp);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: rgba(26, 23, 40, 0.95);
+    border: 1px solid var(--border-soft);
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .bgm-toggle:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  @media (max-width: 768px) {
+    .bgm-toggle {
+      left: 12px;
+      bottom: 64px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .bgm-icon {
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bgm-toggle.playing { animation: none; }
+  }
+</style>
+
+<script>
+  (function initBackgroundMusic() {
+    const audio = document.getElementById('bgm') as HTMLAudioElement | null;
+    const button = document.getElementById('bgmToggle');
+    if (!audio || !button) return;
+
+    function sync() {
+      const playing = !audio!.paused && !audio!.ended;
+      button!.classList.toggle('playing', playing);
+      button!.setAttribute('aria-pressed', playing ? 'true' : 'false');
+      button!.setAttribute('aria-label', playing ? '暂停背景音乐' : '播放背景音乐');
+      button!.setAttribute('data-label', playing ? 'Pause' : 'Music');
+    }
+
+    button.addEventListener('click', () => {
+      if (audio!.paused) {
+        audio!.play().catch(() => {});
+      } else {
+        audio!.pause();
+      }
+    });
+
+    audio.addEventListener('play', sync);
+    audio.addEventListener('pause', sync);
+    audio.addEventListener('ended', sync);
+
+    sync();
+  })();
+</script>

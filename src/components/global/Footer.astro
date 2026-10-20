@@ -1,0 +1,23 @@
+---
+const year = 2026;
+const footerLinks = [
+  { label: 'RSS', href: '/rss.xml' },
+  { label: 'Archive', href: '/archive/' },
+  { label: 'Tags', href: '/tags/' },
+  { label: 'Search', href: '/search/' },
+  { label: 'Markdown', href: '/markdown-theme/' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-sigil">❦</div>
+    <p class="footer-text">Written in the dark, for those who read there.</p>
+    <ul class="footer-links">
+      {footerLinks.map((link) => (
+        <li><a href={link.href}>{link.label}</a></li>
+      ))}
+    </ul>
+    <p class="footer-copy">© MMXXVI Example Journal · Built with Astro · {year}</p>
+  </div>
+</footer>

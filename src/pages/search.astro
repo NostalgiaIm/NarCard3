@@ -1,0 +1,68 @@
+---
+const target = '/#search';
+---
+<!DOCTYPE html>
+<html lang="zh-CN" style="background:#0D0B1A;color-scheme:dark;">
+<head>
+<!-- NO-FLASH: force dark first paint on every Astro/HTML page -->
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0D0B1A" />
+<style is:inline>
+  :root {
+    color-scheme: dark;
+    background: #0D0B1A !important;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    background-color: #0D0B1A !important;
+    color: #E8E4F0 !important;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    background: #0D0B1A;
+    pointer-events: none;
+    animation: exampleJournalBootFade 420ms ease 120ms forwards;
+  }
+
+  body[data-theme="bloodmoon"]::before {
+    background: #1A0A0A;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    color-scheme: dark;
+  }
+
+  @keyframes exampleJournalBootFade {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0D0B1A" />
+  <meta http-equiv="refresh" content={`0; url=${target}`} />
+  <title>Search — Example Journal</title>
+  <style is:inline>
+    html, body { margin: 0; min-height: 100%; background: #0D0B1A; color: #E8E4F0; }
+    body { display: grid; place-items: center; font-family: Georgia, serif; }
+    a { color: #C9A96E; }
+  </style>
+</head>
+<body>
+  <script is:inline>location.replace('/#search');</script>
+  <p><a href={target}>Open Search</a></p>
+</body>
+</html>
+

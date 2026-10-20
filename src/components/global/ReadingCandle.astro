@@ -1,0 +1,40 @@
+<div class="reading-candle" id="readingCandle" aria-hidden="true">
+  <div class="candle-flame"></div>
+  <div class="candle-smoke"></div>
+  <div class="candle-wax" id="candleWax"></div>
+  <div class="candle-base"></div>
+  <div class="candle-percent" id="candlePercent">0%</div>
+</div>
+
+<script>
+  (function () {
+    const candle = document.getElementById('readingCandle');
+    const wax = document.getElementById('candleWax');
+    const percent = document.getElementById('candlePercent');
+    if (!candle || !wax) return;
+
+    const MAX_HEIGHT = 140;
+    let ticking = false;
+
+    function update() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+
+      candle!.classList.toggle('active', scrollTop > 200);
+      wax!.style.height = MAX_HEIGHT * (1 - progress) + 'px';
+      if (percent) percent.textContent = Math.round(progress * 100) + '%';
+      candle!.classList.toggle('extinguished', progress >= 0.98);
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    update();
+  })();
+</script>

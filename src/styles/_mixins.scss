@@ -1,0 +1,28 @@
+@use './tokens' as *;
+
+@mixin glass-panel($alpha: 0.82) {
+  background: rgba(20, 16, 31, $alpha);
+  backdrop-filter: blur(12px);
+  border: 1px solid $border;
+  border-radius: 12px;
+  box-shadow: $shadow-card;
+}
+
+@mixin gold-focus {
+  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: $accent-gold-bright;
+    border-color: $accent-gold;
+    box-shadow: $glow-gold;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

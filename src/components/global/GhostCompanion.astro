@@ -1,0 +1,53 @@
+<div class="ghost-companion" id="ghostCompanion" aria-hidden="true">
+  <svg viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 20 5 Q 5 5 5 25 L 5 45 L 10 42 L 15 45 L 20 42 L 25 45 L 30 42 L 35 45 L 35 25 Q 35 5 20 5 Z"
+          fill="rgba(232, 228, 240, 0.72)" />
+    <circle cx="14" cy="22" r="2" fill="#0D0B1A" />
+    <circle cx="26" cy="22" r="2" fill="#0D0B1A" />
+    <ellipse cx="12" cy="28" rx="3" ry="1.5" fill="rgba(139, 26, 74, 0.35)" />
+    <ellipse cx="28" cy="28" rx="3" ry="1.5" fill="rgba(139, 26, 74, 0.35)" />
+  </svg>
+</div>
+
+<script>
+  (function () {
+    const ghost = document.getElementById('ghostCompanion');
+    if (!ghost) return;
+
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isMobile || prefersReduced) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ghostX = mouseX;
+    let ghostY = mouseY;
+    let hasMoved = false;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!hasMoved) {
+        ghostX = mouseX;
+        ghostY = mouseY;
+        hasMoved = true;
+        ghost!.classList.add('active');
+      }
+    }, { passive: true });
+
+    window.addEventListener('click', () => {
+      ghost!.classList.remove('startled');
+      void (ghost as HTMLElement).offsetWidth;
+      ghost!.classList.add('startled');
+      setTimeout(() => ghost!.classList.remove('startled'), 400);
+    });
+
+    function animate() {
+      ghostX += (mouseX - ghostX) * 0.06;
+      ghostY += (mouseY - ghostY) * 0.06;
+      ghost!.style.transform = `translate(${ghostX + 28}px, ${ghostY - 34}px)`;
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+</script>

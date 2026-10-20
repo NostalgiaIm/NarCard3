@@ -1,0 +1,65 @@
+@use './tokens' as *;
+@use './mixins' as *;
+
+// Scoped to the shared Markdown layout so the independent homepage/editor themes
+// keep their existing visual contracts while blog pages gain the SCSS layer.
+.markdown-body {
+  color: $text-main;
+  font-family: $font-body;
+  text-shadow: 0 0 0.01px currentColor;
+
+  p,
+  li,
+  td {
+    color: $text-soft;
+  }
+
+  h2,
+  h3 {
+    color: $accent-gold;
+    text-wrap: balance;
+  }
+
+  h2 {
+    border-bottom: 1px solid $border-soft;
+    padding-bottom: 0.45em;
+  }
+
+  a {
+    color: $accent-gold;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    @include gold-focus;
+  }
+
+  pre,
+  .code-block {
+    @include glass-panel(0.72);
+    overflow-x: auto;
+  }
+
+  code:not(pre code) {
+    background: rgba(8, 5, 18, 0.72);
+    border: 1px solid $border-soft;
+    border-radius: 0.35rem;
+    color: $accent-gold-bright;
+    font-family: $font-mono;
+    padding: 0.12em 0.4em;
+  }
+
+  blockquote {
+    border-left: 2px solid $accent-wine;
+    background: linear-gradient(90deg, rgba(140, 26, 76, 0.12), transparent 70%);
+    padding-left: 1.2rem;
+  }
+}
+
+// Keep keyboard focus visible without changing the existing component markup.
+:where(.markdown-body, .showcase-shell) :focus-visible {
+  outline: 2px solid $accent-gold;
+  outline-offset: 3px;
+}
+
+:where(.markdown-body, .showcase-shell) {
+  @include reduced-motion;
+}

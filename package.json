@@ -1,0 +1,15 @@
+{
+  "name": "example-journal-template",
+  "version": "1.0.0",
+  "description": "A gothic Astro journal template with an integrated Markdown editor.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync": "astro sync",
+    "check": "astro check"
+  },
+  "dependencies": { "@astrojs/rss": "^4.0.19", "astro": "^7.3.8" },
+  "devDependencies": { "@astrojs/check": "^0.9.10", "sass": "^1.93.2", "typescript": "^6.0.3" },
+  "type": "commonjs"
+}

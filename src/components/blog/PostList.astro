@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PostCard from './PostCard.astro';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  label?: string;
+  emptyText?: string;
+}
+
+const {
+  posts,
+  label = 'Recent Entries',
+  emptyText = 'Nothing here yet. The dark is quiet.',
+} = Astro.props;
+---
+
+<section>
+  <div class="container-narrow">
+    <div class="section-label">{label}</div>
+    {posts.length === 0 ? (
+      <p style="color: var(--text-dim); font-style: italic; font-family: var(--font-serif); font-size: 20px; padding: 40px 0;">
+        {emptyText}
+      </p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((post) => <PostCard {post} />)}
+      </ul>
+    )}
+  </div>
+</section>

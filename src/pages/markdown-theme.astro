@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Style Reference — Example Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Grenze:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   ROOT TOKENS
+   ============================================ */
+:root {
+  --bg: #0D0B1A;
+  --bg-panel: #1A1728;
+  --bg-code: #12101C;
+  --bg-glass: rgba(26, 23, 40, 0.72);
+  --text: #E8E4F0;
+  --text-dim: #9B94A8;
+  --text-faint: #5A5470;
+  --text-nav: #B8B2C8;
+  --hero-meta: #8B7AB8;
+  --accent: #8B1A4A;
+  --accent-bright: #B02A5A;
+  --accent-gold: #C9A96E;
+  --accent-purple: #4A3F6B;
+  --border: rgba(74, 63, 107, 0.35);
+  --border-soft: rgba(74, 63, 107, 0.15);
+
+  --font-gothic: 'UnifrakturMaguntia', serif;
+  --font-sharp: 'Cinzel', serif;
+  --font-soft: 'Quicksand', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-body: 'Grenze', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+button,
+a,
+.page-title,
+.page-subtitle,
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6,
+.markdown-body kbd,
+.markdown-body summary,
+.toc,
+.toc *,
+.callout-title,
+.logo,
+.section-indicator {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+img,
+svg {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  padding: 0 24px 120px;
+}
+
+/* 噪点纹理 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ============================================
+   页面骨架
+   ============================================ */
+.page-header {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 0 64px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 80px;
+}
+
+.page-header h1 {
+  font-family: var(--font-gothic);
+  font-size: clamp(48px, 7vw, 72px);
+  color: var(--accent-gold);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  text-shadow: 0 0 60px rgba(201, 169, 110, 0.2);
+}
+
+.page-header p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--text-dim);
+}
+
+.page-header .meta {
+  font-family: var(--font-sharp);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--hero-meta);
+  margin-top: 20px;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* 章节分隔说明 */
+.section-marker {
+  font-family: var(--font-sharp);
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 80px 0 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+.section-marker:first-child {
+  margin-top: 0;
+}
+
+/* ============================================
+   MARKDOWN RENDER STYLES
+   ============================================ */
+
+.markdown-body {
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 19px;
+  line-height: 1.9;
+  word-wrap: break-word;
+}
+
+/* ---------- 段落 ---------- */
+.markdown-body p {
+  margin: 0 0 1.6em;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 标题 ---------- */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  line-height: 1.25;
+  scroll-margin-top: 100px;
+}
+
+.markdown-body h1 {
+  font-family: var(--font-gothic);
+  font-size: clamp(38px, 5vw, 52px);
+  color: var(--accent-gold);
+  margin: 64px 0 24px;
+  text-shadow: 0 0 40px rgba(201, 169, 110, 0.15);
+}
+
+.markdown-body h2 {
+  font-family: var(--font-gothic);
+  font-size: 40px;
+  color: var(--accent-gold);
+  margin: 72px 0 24px;
+}
+
+.markdown-body h2::before {
+  content: '❦';
+  color: var(--accent);
+  margin-right: 16px;
+  font-size: 24px;
+  vertical-align: middle;
+  opacity: 0.65;
+}
+
+.markdown-body h3 {
+  font-family: var(--font-sharp);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  margin: 48px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.22);
+}
+
+.markdown-body h3::before {
+  content: '§ ';
+  color: var(--accent-gold);
+  opacity: 0.5;
+}
+
+.markdown-body h4 {
+  font-family: var(--font-sharp);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent-bright);
+  letter-spacing: 0.03em;
+  margin: 36px 0 14px;
+}
+
+.markdown-body h5 {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 28px 0 12px;
+}
+
+.markdown-body h6 {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--text-faint);
+  margin: 24px 0 10px;
+}
+
+/* ---------- 链接 ---------- */
+.markdown-body a {
+  color: var(--accent-bright);
+  text-decoration: none;
+  background-image: linear-gradient(var(--accent-bright), var(--accent-bright));
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.4s var(--ease-soft), color 0.3s;
+  padding-bottom: 2px;
+}
+
+.markdown-body a:hover {
+  background-size: 100% 1px;
+  color: var(--accent-gold);
+}
+
+.markdown-body a[href^="http"]::after {
+  content: '↗';
+  font-size: 0.75em;
+  margin-left: 3px;
+  opacity: 0.6;
+  vertical-align: super;
+}
+
+/* ---------- 强调 ---------- */
+.markdown-body strong {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.markdown-body em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05em;
+  color: var(--text-dim);
+}
+
+.markdown-body del {
+  color: var(--text-faint);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+
+.markdown-body mark {
+  background: rgba(139, 26, 74, 0.28);
+  color: var(--text);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+/* ---------- 行内代码 ---------- */
+.markdown-body code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(74, 63, 107, 0.25);
+  color: var(--accent-gold);
+  padding: 0.15em 0.45em;
+  border-radius: 3px;
+  border: 1px solid rgba(74, 63, 107, 0.3);
+}
+
+/* ---------- 代码块 ---------- */
+.markdown-body pre {
+  margin: 32px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  font-size: 14px;
+}
+
+.markdown-body pre[data-language]::before {
+  content: attr(data-language);
+  display: block;
+  padding: 8px 16px;
+  background: rgba(26, 23, 40, 0.85);
+  border-bottom: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.markdown-body pre code {
+  display: block;
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.75;
+  color: #C8C3D8;
+  overflow-x: auto;
+  background: transparent;
+  border: none;
+}
+
+.tok-kw { color: #B02A5A; font-weight: 500; }
+.tok-str { color: #C9A96E; }
+.tok-fn { color: #8B7AB8; }
+.tok-cm { color: #5A5470; font-style: italic; }
+.tok-num { color: #D4879F; }
+.tok-prop { color: #7FB8B0; }
+.tok-punct { color: #6B6480; }
+
+/* ---------- 引用 ---------- */
+.markdown-body blockquote {
+  margin: 40px 0;
+  padding: 24px 32px;
+  border-left: 3px solid var(--accent);
+  background: linear-gradient(90deg, rgba(139, 26, 74, 0.08), transparent);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  border-radius: 0 4px 4px 0;
+  position: relative;
+}
+
+.markdown-body blockquote::before {
+  content: '❝';
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  font-family: var(--font-serif);
+  font-size: 48px;
+  color: var(--accent);
+  opacity: 0.35;
+  line-height: 1;
+}
+
+.markdown-body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body blockquote blockquote {
+  margin: 16px 0;
+  border-left-color: var(--accent-purple);
+  font-size: 20px;
+}
+
+/* ---------- 列表 ---------- */
+.markdown-body ul,
+.markdown-body ol {
+  margin: 24px 0 32px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.markdown-body ul li {
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 12px;
+}
+
+.markdown-body ul li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.markdown-body ol {
+  counter-reset: ordered;
+}
+
+.markdown-body ol li {
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 12px;
+  counter-increment: ordered;
+}
+
+.markdown-body ol li::before {
+  content: counter(ordered, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--font-sharp);
+  font-size: 13px;
+  color: var(--accent-gold);
+  letter-spacing: 0.1em;
+}
+
+.markdown-body ul ul li::before {
+  content: '◦';
+  color: var(--accent-purple);
+}
+
+.markdown-body ul ul ul li::before {
+  content: '·';
+  color: var(--text-faint);
+}
+
+/* ---------- 任务列表 ---------- */
+.markdown-body input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--accent-purple);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: -3px;
+  margin-right: 10px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.markdown-body input[type="checkbox"]:hover {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 10px rgba(201, 169, 110, 0.3);
+}
+
+.markdown-body input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.markdown-body input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.markdown-body li.task-list-item {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-body li.task-list-item::before {
+  display: none;
+}
+
+/* ---------- 表格 ---------- */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 32px 0;
+  font-size: 17px;
+}
+
+.markdown-body thead {
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown-body th {
+  font-family: var(--font-sharp);
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 14px 16px;
+  background: rgba(26, 23, 40, 0.8);
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.markdown-body td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-dim);
+}
+
+.markdown-body tbody tr {
+  transition: background 0.3s;
+}
+
+.markdown-body tbody tr:nth-child(even) {
+  background: rgba(26, 23, 40, 0.4);
+}
+
+.markdown-body tbody tr:hover {
+  background: rgba(139, 26, 74, 0.08);
+}
+
+/* ---------- 分隔线 ---------- */
+.markdown-body hr {
+  border: none;
+  height: 40px;
+  margin: 56px 0;
+  background: transparent;
+  position: relative;
+}
+
+.markdown-body hr::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+.markdown-body hr::after {
+  content: '❦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  padding: 0 16px;
+  color: var(--accent);
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+/* ---------- 图片 ---------- */
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid var(--border-soft);
+  display: block;
+  margin: 32px auto;
+}
+
+.markdown-body figure {
+  margin: 40px 0;
+}
+
+.markdown-body figure img {
+  margin: 0 auto;
+}
+
+.markdown-body figcaption {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 14px;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 键盘按键 ---------- */
+.markdown-body kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-code));
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--text);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- 上标下标 ---------- */
+.markdown-body sup,
+.markdown-body sub {
+  font-size: 0.75em;
+  color: var(--text-dim);
+  line-height: 0;
+}
+
+/* ---------- 脚注 ---------- */
+.markdown-body .footnotes {
+  margin-top: 72px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.markdown-body .footnotes::before {
+  content: 'Footnotes';
+  display: block;
+  font-family: var(--font-sharp);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+}
+
+.markdown-body .footnotes ol li::before {
+  color: var(--accent-purple);
+}
+
+/* ---------- Callout ---------- */
+.markdown-body blockquote.callout {
+  border-left-width: 3px;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 17px;
+  padding: 18px 24px 18px 56px;
+  color: var(--text);
+}
+
+.markdown-body blockquote.callout::before {
+  font-family: var(--font-sharp);
+  font-size: 20px;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  line-height: 1;
+  opacity: 1;
+}
+
+.markdown-body blockquote.callout .callout-title {
+  font-family: var(--font-sharp);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.markdown-body blockquote.callout p {
+  margin: 0;
+}
+
+.markdown-body blockquote.callout-note {
+  border-left-color: var(--accent-purple);
+  background: rgba(74, 63, 107, 0.1);
+}
+
+.markdown-body blockquote.callout-note::before {
+  content: 'ℹ';
+  color: #8B7AB8;
+}
+
+.markdown-body blockquote.callout-note .callout-title {
+  color: #8B7AB8;
+}
+
+.markdown-body blockquote.callout-tip {
+  border-left-color: var(--accent-gold);
+  background: rgba(201, 169, 110, 0.06);
+}
+
+.markdown-body blockquote.callout-tip::before {
+  content: '✦';
+  color: var(--accent-gold);
+}
+
+.markdown-body blockquote.callout-tip .callout-title {
+  color: var(--accent-gold);
+}
+
+.markdown-body blockquote.callout-warning {
+  border-left-color: var(--accent);
+  background: rgba(139, 26, 74, 0.08);
+}
+
+.markdown-body blockquote.callout-warning::before {
+  content: '⚠';
+  color: var(--accent-bright);
+}
+
+.markdown-body blockquote.callout-warning .callout-title {
+  color: var(--accent-bright);
+}
+
+.markdown-body blockquote.callout-danger {
+  border-left-color: #C42A2A;
+  background: rgba(196, 42, 42, 0.12);
+}
+
+.markdown-body blockquote.callout-danger::before {
+  content: '☠';
+  color: #E03A3A;
+}
+
+.markdown-body blockquote.callout-danger .callout-title {
+  color: #E03A3A;
+}
+
+/* ---------- 折叠块 ---------- */
+.markdown-body details {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  background: rgba(26, 23, 40, 0.4);
+}
+
+.markdown-body summary {
+  font-family: var(--font-sharp);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--accent-gold);
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding-left: 20px;
+  transition: color 0.3s;
+}
+
+.markdown-body summary::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: transform 0.3s;
+}
+
+.markdown-body details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.markdown-body summary:hover {
+  color: var(--accent-bright);
+}
+
+.markdown-body details[open] {
+  padding-bottom: 20px;
+}
+
+.markdown-body details > *:not(summary) {
+  margin-top: 16px;
+}
+
+/* ---------- 首字下沉 ---------- */
+.markdown-body p.drop-cap::first-letter {
+  font-family: var(--font-gothic);
+  font-size: 4em;
+  float: left;
+  line-height: 0.85;
+  margin: 6px 12px 0 0;
+  color: var(--accent-gold);
+  text-shadow: 0 0 24px rgba(201, 169, 110, 0.3);
+}
+
+/* ---------- 目录 ---------- */
+.markdown-body nav.toc {
+  background: rgba(26, 23, 40, 0.4);
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--accent-gold);
+  border-radius: 0 4px 4px 0;
+  padding: 24px 28px;
+  margin-bottom: 56px;
+  font-size: 16px;
+}
+
+.markdown-body nav.toc ol {
+  list-style: none;
+  counter-reset: toc;
+  margin: 0;
+}
+
+.markdown-body nav.toc li {
+  counter-increment: toc;
+  padding: 5px 0;
+  color: var(--text-dim);
+  padding-left: 0;
+}
+
+.markdown-body nav.toc li::before {
+  content: counter(toc, upper-roman) '.';
+  color: var(--accent-purple);
+  font-family: var(--font-sharp);
+  font-size: 12px;
+  margin-right: 12px;
+  letter-spacing: 0.1em;
+  position: static;
+  display: inline;
+}
+
+.markdown-body nav.toc a {
+  color: var(--text-dim);
+  text-decoration: none;
+  background: none;
+}
+
+.markdown-body nav.toc a:hover {
+  color: var(--accent-gold);
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 768px) {
+  body { padding: 0 18px 80px; }
+  .page-header { padding: 56px 0 40px; margin-bottom: 56px; }
+  .markdown-body { font-size: 17px; }
+  .markdown-body h2 { font-size: 30px; margin-top: 52px; }
+  .markdown-body h3 { font-size: 19px; }
+  .markdown-body blockquote { font-size: 18px; padding: 20px 24px; }
+  .markdown-body table { font-size: 14px; }
+  .markdown-body th, .markdown-body td { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Markdown Reference</h1>
+  <p>Every element, rendered in the Example Journal style</p>
+  <div class="meta">Type Specimen · MMXXVI</div>
+</header>
+
+<div class="container">
+
+  <!-- ============================================
+       块级元素
+       ============================================ -->
+  <div class="section-marker">Block Elements</div>
+  <div class="markdown-body" style="margin-top: 48px;">
+
+    <!-- 标题层级 -->
+    <h1>Heading Level One</h1>
+    <p>这是 H1 的样子，哥特字体，暗金色，带有一圈微微的光晕。通常用于文章的主标题。</p>
+
+    <h2>Heading Level Two</h2>
+    <p>H2 前面有一枚小鸢尾花装饰，用于主要章节。</p>
+
+    <h3>Heading Level Three</h3>
+    <p>H3 用 Cinzel，带暗金色下划线，用于小节。</p>
+
+    <h4>Heading Level Four</h4>
+    <p>H4 用暗红色，层级更低一档。</p>
+
+    <h5>Heading Level Five</h5>
+    <p>H5 用大写间距字母，比正文略小。</p>
+
+    <h6>Heading Level Six</h6>
+    <p>H6 用斜体，最轻的一级。</p>
+
+    <hr>
+
+    <!-- 段落与强调 -->
+    <h2>Paragraphs &amp; Emphasis</h2>
+
+    <p class="drop-cap">
+      这是一段首字下沉的段落。Drop cap 让文章开头有了中世纪手抄本的味道，大写的
+      <strong>UnifrakturMaguntia</strong> 字母从段落中浮起，带着暗金色的微光。这个效果
+      适合用在长文的第一个段落上。
+    </p>
+
+    <p>
+      普通段落用 <strong>Grenze</strong>，行高 1.9，段落间距 1.6em。
+      你可以用 <strong>加粗</strong> 来强调重点，用 <em>斜体</em> 来表达语气，
+      用 <del>删除线</del> 来表示作废，用 <mark>高亮标记</mark> 来突出关键句。
+    </p>
+
+    <p>
+      行内代码像这样：<code>const exampleJournal = true</code>，
+      键盘按键像这样：<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>，
+      上标<sup>[1]</sup> 和下标 H<sub>2</sub>O 也都有样式。
+    </p>
+
+    <p>
+      链接默认是 <a href="#">暗红色</a>，悬停时下划线从左到右渐入，颜色变成
+      <a href="#">暗金色</a>。外部链接会自动带一个 <a href="https://example.com">↗ 小箭头</a>。
+    </p>
+
+    <hr>
+
+    <!-- 引用 -->
+    <h2>Blockquote</h2>
+
+    <blockquote>
+      <p>字母不是形状，而是凝固在墨里的手势，一只手伸过几个世纪。</p>
+    </blockquote>
+
+    <p>引用块也可以嵌套，内层用紫色左线区分：</p>
+
+    <blockquote>
+      <p>外层引用。</p>
+      <blockquote>
+        <p>内层引用，颜色更深，字号略小。</p>
+      </blockquote>
+    </blockquote>
+
+    <hr>
+
+    <!-- 列表 -->
+    <h2>Lists</h2>
+
+    <h3>Unordered</h3>
+    <ul>
+      <li>第一项，用鸢尾花符号 ✦</li>
+      <li>第二项，同样是暗红色标记
+        <ul>
+          <li>嵌套层级换成空心圆 ◦</li>
+          <li>再深一层换成实心点 ·</li>
+        </ul>
+      </li>
+      <li>第三项</li>
+    </ul>
+
+    <h3>Ordered</h3>
+    <ol>
+      <li>第一项，用暗金色两位数字编号</li>
+      <li>第二项
+        <ol>
+          <li>嵌套有序列表继承样式</li>
+          <li>编号会自动递增</li>
+        </ol>
+      </li>
+      <li>第三项</li>
+    </ol>
+
+    <h3>Task List</h3>
+    <ul>
+      <li class="task-list-item"><input type="checkbox" checked> 已完成的任务</li>
+      <li class="task-list-item"><input type="checkbox"> 未完成的任务</li>
+      <li class="task-list-item"><input type="checkbox" checked> 勾选后变成暗红底</li>
+      <li class="task-list-item"><input type="checkbox"> 悬停时有金色微光</li>
+    </ul>
+
+    <hr>
+
+    <!-- 代码块 -->
+    <h2>Code Blocks</h2>
+
+    <p>代码块顶部有语言标签，背景比页面深一档，形成凹陷感：</p>
+
+    <pre data-language="typescript"><code><span class="tok-cm">// 定义哥特主题的 token</span>
+<span class="tok-kw">const</span> <span class="tok-fn">theme</span> <span class="tok-punct">=</span> <span class="tok-punct">&#123;</span>
+  <span class="tok-prop">background</span><span class="tok-punct">:</span> <span class="tok-str">'#0D0B1A'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">surface</span><span class="tok-punct">:</span>    <span class="tok-str">'#1A1728'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">primary</span><span class="tok-punct">:</span>    <span class="tok-str">'#8B1A4A'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">accent</span><span class="tok-punct">:</span>     <span class="tok-str">'#C9A96E'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">text</span><span class="tok-punct">:</span>       <span class="tok-str">'#E8E4F0'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">muted</span><span class="tok-punct">:</span>      <span class="tok-str">'#9B94A8'</span><span class="tok-punct">,</span>
+  <span class="tok-prop">radius</span><span class="tok-punct">:</span>     <span class="tok-num">6</span><span class="tok-punct">,</span>
+<span class="tok-punct">&#125;</span> <span class="tok-kw">as const</span><span class="tok-punct">;</span>
+</code></pre>
+
+    <pre data-language="css"><code><span class="tok-cm">/* 哥特暗色的核心变量 */</span>
+<span class="tok-fn">:root</span> <span class="tok-punct">&#123;</span>
+  <span class="tok-prop">--bg</span><span class="tok-punct">:</span> <span class="tok-str">#0D0B1A</span><span class="tok-punct">;</span>
+  <span class="tok-prop">--accent</span><span class="tok-punct">:</span> <span class="tok-str">#8B1A4A</span><span class="tok-punct">;</span>
+  <span class="tok-prop">--gold</span><span class="tok-punct">:</span> <span class="tok-str">#C9A96E</span><span class="tok-punct">;</span>
+<span class="tok-punct">&#125;</span>
+</code></pre>
+
+    <hr>
+
+    <!-- Callout -->
+    <h2>Callouts</h2>
+
+    <blockquote class="callout callout-note">
+      <span class="callout-title">Note</span>
+      <p>这是 Note 类型的提示框，暗紫色调，带一个信息图标。</p>
+    </blockquote>
+
+    <blockquote class="callout callout-tip">
+      <span class="callout-title">Tip</span>
+      <p>这是 Tip 类型的提示框，暗金色调，带一个星形图标。</p>
+    </blockquote>
+
+    <blockquote class="callout callout-warning">
+      <span class="callout-title">Warning</span>
+      <p>这是 Warning 类型的提示框，暗红色调，带一个警告图标。</p>
+    </blockquote>
+
+    <blockquote class="callout callout-danger">
+      <span class="callout-title">Danger</span>
+      <p>这是 Danger 类型的提示框，更深的红色，带一个骷髅图标。</p>
+    </blockquote>
+
+    <hr>
+
+    <!-- 表格 -->
+    <h2>Table</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Typeface</th>
+          <th>Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gothic Display</td>
+          <td>UnifrakturMaguntia</td>
+          <td>Titles, logo, H1/H2</td>
+        </tr>
+        <tr>
+          <td>Sharp / Carved</td>
+          <td>Cinzel</td>
+          <td>Nav, labels, metadata</td>
+        </tr>
+        <tr>
+          <td>Soft / Rounded</td>
+          <td>Quicksand</td>
+          <td>Special callouts</td>
+        </tr>
+        <tr>
+          <td>Body / Gothic Serif</td>
+          <td>Grenze</td>
+          <td>Long-form reading</td>
+        </tr>
+        <tr>
+          <td>Mono / Code</td>
+          <td>JetBrains Mono</td>
+          <td>Code blocks, tokens</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <!-- 图片 -->
+    <h2>Image</h2>
+
+    <p>图片有细边框和极小圆角，下方可以配斜体题注：</p>
+
+    <figure>
+      <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231A1728'/%3E%3Cstop offset='1' stop-color='%238B1A4A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='400' fill='url(%23g)'/%3E%3Ctext x='400' y='200' font-family='serif' font-size='48' fill='%23C9A96E' text-anchor='middle' dominant-baseline='middle'%3EExample Journal%3C/text%3E%3C/svg%3E" alt="示例图片">
+      <figcaption>图 1 — 一个示例图片，题注用 Cormorant 斜体居中。</figcaption>
+    </figure>
+
+    <hr>
+
+    <!-- 折叠块 -->
+    <h2>Details</h2>
+
+    <details>
+      <summary>点击展开查看内容</summary>
+      <p>这是折叠块的内容。标题用 Cinzel 大写间距，展开时箭头会旋转 90 度。</p>
+      <p>折叠块内部可以放任意 Markdown 元素，包括列表、代码、引用等。</p>
+    </details>
+
+    <details open>
+      <summary>这个是默认展开的</summary>
+      <p>设置 <code>open</code> 属性后默认展开，箭头已经是旋转状态。</p>
+    </details>
+
+    <hr>
+
+    <!-- 脚注 -->
+    <h2>Footnotes</h2>
+
+    <p>正文里可以有脚注引用<sup>[1]</sup>，底部自动生成脚注区域。</p>
+
+    <div class="footnotes">
+      <ol>
+        <li>这是第一条脚注的内容，字号比正文小，颜色更暗。</li>
+        <li>这是第二条脚注，编号用暗金色。</li>
+      </ol>
+    </div>
+
+    <hr>
+
+    <!-- 目录 -->
+    <h2>Table of Contents</h2>
+
+    <nav class="toc">
+      <ol>
+        <li><a href="#">On Choosing Typefaces</a></li>
+        <li><a href="#">Code &amp; Monospace</a></li>
+        <li><a href="#">The Sharp and the Soft</a></li>
+        <li><a href="#">Closing the Chapter</a></li>
+      </ol>
+    </nav>
+
+    <hr>
+
+    <!-- 综合段落 -->
+    <h2>Putting It Together</h2>
+
+    <p>
+      一个设计良好的哥特博客不是为暗而暗。它是 <em>刻意的</em>——每一个对比度、
+      每一个字间距、每一个 <code>0.35s</code> 的过渡，都为了构建一个比网络本身更古老的世界。
+    </p>
+
+    <blockquote>
+      <p>阴影不是空的。它们是<strong>满的</strong>。</p>
+    </blockquote>
+
+  </div>
+
+</div>
+
+</body>
+</html>

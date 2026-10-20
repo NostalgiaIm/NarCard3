@@ -1,0 +1,22 @@
+---
+const target = '/#archive';
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0D0B1A" />
+  <meta http-equiv="refresh" content={`0; url=${target}`} />
+  <title>Archive — Example Journal</title>
+  <style is:inline>
+    html, body { margin: 0; min-height: 100%; background: #0D0B1A; color: #E8E4F0; }
+    body { display: grid; place-items: center; font-family: Georgia, serif; }
+    a { color: #C9A96E; }
+  </style>
+</head>
+<body>
+  <script is:inline>location.replace('/#archive');</script>
+  <p><a href={target}>Open Archive</a></p>
+</body>
+</html>
