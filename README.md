@@ -21,6 +21,7 @@ A complete dark, gothic-inspired Astro blog template with the original visual sy
 - SCSS design tokens, mixins, and incremental enhancement styles
 - KaTeX formula rendering
 - Standalone Markdown editor
+- Optional Tauri v2 + Rust desktop editor prototype
 - Formula editor with templates, matrices, colors, fonts, environments, and favorites
 - Source/visual formula editing modes
 - Article switching and draft persistence in the editor
@@ -77,6 +78,11 @@ src/
 
 public/
 └── editor.html              # Standalone Markdown/LaTeX editor
+
+narcard-editor/              # Optional Tauri v2 + Rust desktop editor prototype
+├── index.html                # Desktop editor shell
+├── src/main.js              # Frontend bridge and editor interactions
+└── src-tauri/                # Rust commands, permissions, and Tauri config
 
 astro.config.mjs             # Astro configuration and site URL
 package.json                 # Scripts and dependencies
@@ -140,6 +146,43 @@ The editor includes:
 - One-click import after a directory has been selected
 
 The browser File System Access API requires the user to explicitly select a directory and grant permission. The template does not bypass browser permissions or upload local files in the background.
+
+### Optional Tauri editor
+
+The repository also contains an independent desktop editor prototype in `narcard-editor/`. It is deliberately kept separate from the Astro root project so the browser editor and the website remain usable while the native workflow is being tested.
+
+The Tauri prototype currently supports:
+
+- Selecting and validating an Astro project directory
+- Checking for `src/data/posts.ts` and `src/pages/index.astro`
+- Reading the number of existing home-page articles
+- Validating slugs and ISO dates before writing
+- Detecting duplicate slugs
+- Writing a new article into the home-page article system
+- Creating `.bak` backups before replacing source files
+- Using temporary files during replacement, including Windows handling
+- Basic Markdown-to-HTML conversion with HTML escaping
+- Markdown export when running in browser preview mode
+
+The current prototype writes only to the home-page article system. It does not automatically synchronize `src/content/blog/*.md`, process cover images, publish through Git, or replace the existing browser editor. Those capabilities are intentionally left for later stages.
+
+To install and run the desktop prototype:
+
+```bash
+cd narcard-editor
+bun install
+bun run tauri:dev
+```
+
+Rust checks can be run from `narcard-editor/src-tauri/`:
+
+```bash
+cargo fmt --check
+cargo test
+cargo check
+```
+
+Before testing writes, use a copy of an Astro project rather than the only working copy. The desktop editor creates backups, but testing against a disposable project makes rollback and failure testing safer. Windows development also requires Rust/Cargo, Microsoft C++ Build Tools, and WebView2.
 
 ## SCSS
 
