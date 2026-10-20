@@ -1,58 +1,60 @@
 # NarCard3
 
-一个完整的 Astro 暗色哥特风博客模板，保留首页视觉系统、文章浏览、归档、标签、图库、搜索、Markdown 内容页，以及独立的本地 Markdown/LaTeX 编辑器。
+[简体中文](./README.zh-CN.md)
 
-> 本仓库只提供模板代码和中性示例内容，不包含个人文章、私人图片、私人音频或本地开发环境文件。
+A complete dark, gothic-inspired Astro blog template with the original visual system, article browsing, archives, tags, gallery, search, Markdown content pages, and an integrated local Markdown/LaTeX editor.
+
+> This repository contains template code and neutral example content. It does not include personal articles, private images, private audio, or local development files.
 >
 > Repository: https://github.com/NostalgiaIm/NarCard3
 
-## 特性
+## Features
 
-- Astro 静态站点结构
-- 暗色哥特风视觉主题
-- 可切换的血红主题
-- 首页文章浏览与详情视图
-- 文章归档、标签、图库和搜索入口
-- Markdown 内容集合与文章路由
-- RSS、sitemap、robots.txt
-- canonical、Open Graph、Twitter Card 和 JSON-LD 元数据
-- SCSS 设计令牌、mixins 与增量样式层
-- KaTeX 公式渲染
-- 独立 Markdown 编辑器
-- 公式编辑器：模板、矩阵、颜色、字体、环境、收藏夹
-- 编辑器源码/可视化模式
-- 编辑器文章切换和草稿保存
-- Markdown 导出与主站导入入口
-- 响应式布局与键盘操作
+- Astro static site structure
+- Dark gothic-inspired visual theme
+- Switchable Blood Moon theme
+- Home page article browsing and detail views
+- Archives, tags, gallery, and search entry points
+- Markdown content collection and article routes
+- RSS, sitemap, and robots.txt
+- Canonical URLs, Open Graph, Twitter Cards, and JSON-LD metadata
+- SCSS design tokens, mixins, and incremental enhancement styles
+- KaTeX formula rendering
+- Standalone Markdown editor
+- Formula editor with templates, matrices, colors, fonts, environments, and favorites
+- Source/visual formula editing modes
+- Article switching and draft persistence in the editor
+- Markdown export and main-site import entry points
+- Responsive layout and keyboard interactions
 
-## 环境要求
+## Requirements
 
-- Node.js 18 或更高版本
+- Node.js 18 or later
 - npm
-- 支持现代 JavaScript 的浏览器
+- A modern JavaScript-enabled browser
 
-## 本地启动
+## Run locally
 
-在项目根目录执行：
+From the project root:
 
 ```bash
 npm install
 npm run dev
 ```
 
-打开网站：
+Open the site:
 
 ```text
 http://localhost:4321/
 ```
 
-打开本地编辑器：
+Open the local editor:
 
 ```text
 http://localhost:4321/editor.html
 ```
 
-## 构建与预览
+## Build and preview
 
 ```bash
 npm run check
@@ -60,37 +62,37 @@ npm run build
 npm run preview
 ```
 
-构建产物会生成到 `dist/`。`dist/` 已被 `.gitignore` 排除，不建议提交到仓库。
+The build output is written to `dist/`. The `dist/` directory is excluded by `.gitignore` and should not normally be committed.
 
-## 项目结构
+## Project structure
 
 ```text
 src/
-├── components/              # 全局、博客和 UI 组件
-├── content/blog/            # Markdown 示例文章
-├── data/posts.ts            # 首页文章元数据
-├── layouts/                 # Astro 布局与 SEO 元数据
-├── pages/                   # 首页、博客、归档、标签、搜索等路由
-└── styles/                  # CSS、SCSS 令牌、mixins 和增强样式
+├── components/              # Global, blog, and UI components
+├── content/blog/            # Markdown example articles
+├── data/posts.ts            # Home page article metadata
+├── layouts/                 # Astro layouts and SEO metadata
+├── pages/                   # Home, blog, archive, tag, search, and utility routes
+└── styles/                  # CSS, SCSS tokens, mixins, and enhancements
 
 public/
-└── editor.html              # 独立 Markdown/LaTeX 编辑器
+└── editor.html              # Standalone Markdown/LaTeX editor
 
-astro.config.mjs             # Astro 配置和站点 URL
-package.json                 # 项目脚本与依赖
+astro.config.mjs             # Astro configuration and site URL
+package.json                 # Scripts and dependencies
 ```
 
-## 添加文章
+## Adding articles
 
-### Markdown 文章
+### Markdown articles
 
-将文章放入：
+Place articles in:
 
 ```text
 src/content/blog/
 ```
 
-文章需要包含 frontmatter，例如：
+Use frontmatter such as:
 
 ```md
 ---
@@ -105,43 +107,43 @@ draft: false
 Write your article here.
 ```
 
-### 首页文章数据
+### Home page article data
 
-首页演示列表使用：
+The home page demo list uses:
 
 ```text
 src/data/posts.ts
 ```
 
-修改文章后，请确保 slug、标题、日期、标签、分类和摘要保持一致。正式项目可以进一步统一首页数据和 Markdown 内容集合。
+Keep slugs, titles, dates, tags, categories, and excerpts consistent when editing the data. A production project may further unify the home-page data and the Markdown content collection.
 
-## 编辑器
+## Editor
 
-访问：
+Open:
 
 ```text
 /editor.html
 ```
 
-编辑器支持：
+The editor includes:
 
-- Markdown 实时预览
-- 文章元数据编辑
-- 文章草稿保存
-- 文章切换
-- Markdown 导入和导出
-- LaTeX 公式编辑
-- 公式模板和矩阵工具
-- 公式收藏夹
-- 公式图片/文档导入入口
-- 一键复制主站代码
-- 选择目录后的一键导入
+- Live Markdown preview
+- Article metadata editing
+- Draft persistence
+- Article switching
+- Markdown import and export
+- LaTeX formula editing
+- Formula templates and matrix tools
+- Formula favorites
+- Image/document formula import entry points
+- One-click copying of main-site code
+- One-click import after a directory has been selected
 
-浏览器的 File System Access API 需要用户明确选择目录并授予权限。模板不会绕过浏览器权限，也不会在后台上传本地文件。
+The browser File System Access API requires the user to explicitly select a directory and grant permission. The template does not bypass browser permissions or upload local files in the background.
 
 ## SCSS
 
-项目使用 Sass/SCSS 作为增量设计层：
+The project uses Sass/SCSS as an incremental design layer:
 
 ```text
 src/styles/_tokens.scss
@@ -149,41 +151,41 @@ src/styles/_mixins.scss
 src/styles/scss-enhancements.scss
 ```
 
-现有 `global.css` 保留不动，SCSS 只对共享博客/Markdown 布局提供增强样式，以降低迁移风险。
+The existing `global.css` is intentionally preserved. SCSS provides scoped enhancements for shared blog and Markdown layouts, reducing migration risk.
 
-## SEO 与站点配置
+## SEO and site configuration
 
-正式部署前，请修改 `astro.config.mjs` 中的站点地址：
+Before production deployment, update the site URL in `astro.config.mjs`:
 
 ```js
 site: 'https://your-domain.example'
 ```
 
-该地址会影响：
+This value affects:
 
-- canonical URL
-- RSS 链接
-- sitemap
+- Canonical URLs
+- RSS links
+- Sitemap
 - robots.txt
 - JSON-LD
-- Open Graph URL
+- Open Graph URLs
 
-当前模板使用 `https://example.com` 作为占位地址。
+The template uses `https://example.com` as a placeholder.
 
-## 媒体资源
+## Media assets
 
-模板不附带私人媒体。请只添加你拥有版权或明确获得授权的图片、音频和字体资源，并注意清除图片 EXIF 等元数据。
+The template does not include private media. Only add images, audio, and fonts that you own or are explicitly licensed to use. Consider removing EXIF and other metadata from images before publishing.
 
-建议资源目录：
+Suggested directories:
 
 ```text
 public/images/
 public/audio/
 ```
 
-## GitHub 发布
+## Publishing to GitHub
 
-本模板已包含 `.gitignore`，会排除：
+The template includes a `.gitignore` that excludes:
 
 ```text
 node_modules/
@@ -193,32 +195,32 @@ dist/
 *.bak
 *.prev.html
 *.before-final-*.html
-私有媒体文件
+Private media files
 ```
 
-首次提交前建议检查：
+Before the first commit, review the staged files:
 
 ```bash
 git status
 git ls-files
 ```
 
-确认没有把本地路径、私人文章、备份文件、构建缓存或未授权媒体加入提交。
+Make sure local paths, private articles, backup files, build caches, and unlicensed media are not included.
 
-本项目文档不会自动创建 Git 远程仓库，也不会自动推送代码或添加协作者。
+This documentation does not create a Git remote, push code, or add collaborators automatically.
 
-## 未默认启用的功能
+## Features not enabled by default
 
 ### Pagefind
 
-当前模板保留现有搜索入口，没有强制引入 Pagefind。若需要全文搜索，可以根据部署平台和内容规模单独接入。
+The template keeps its existing search entry point and does not force Pagefind into the project. Add it separately if full-text search is needed for your deployment and content size.
 
 ### Giscus
 
-当前模板没有绑定任何 GitHub Discussions 或评论仓库。使用者可以在配置自己的公开仓库、Discussion 分类和权限后，再单独接入评论功能。
+The template is not connected to any GitHub Discussions repository or comment configuration. Configure your own public repository and Discussion category before adding comments.
 
-## 许可
+## License
 
-本项目采用 MIT License。详见 [LICENSE](./LICENSE)。
+This project is released under the MIT License. See [LICENSE](./LICENSE).
 
-请注意：第三方依赖、字体、图片、音频和外部服务可能拥有各自的许可条款，使用前请分别确认。
+Third-party dependencies, fonts, images, audio, and external services may have separate license terms. Review them before use.
