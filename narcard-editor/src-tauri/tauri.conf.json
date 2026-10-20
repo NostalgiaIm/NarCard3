@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "NarCard Editor",
+  "version": "0.1.0",
+  "identifier": "com.narcard.editor",
+  "build": {
+    "beforeDevCommand": "bun run dev -- --host 127.0.0.1",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "NarCard Editor",
+        "width": 1200,
+        "height": 820,
+        "minWidth": 760,
+        "minHeight": 560,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self' http://localhost:1420 ws://localhost:1420"
+    }
+  },
+  "bundle": {
+    "active": false,
+    "targets": "all",
+    "icon": ["icons/icon.svg"]
+  }
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NarCard Editor</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">NAR // DESKTOP EDITOR</p>
+          <h1>NarCard Editor</h1>
+        </div>
+        <span id="runtimeBadge" class="badge">浏览器模式</span>
+      </header>
+
+      <section class="status-panel" aria-live="polite">
+        <div>
+          <strong id="healthTitle">等待 Rust 连接</strong>
+          <p id="healthMessage">桌面版启动后会在这里显示通信状态。</p>
+        </div>
+        <button id="chooseProject" type="button">选择 Astro 项目</button>
+      </section>
+
+      <section class="workspace">
+        <aside class="meta-panel">
+          <h2>文章信息</h2>
+          <label>标题<input id="title" type="text" value="未命名文章" /></label>
+          <label>Slug<input id="slug" type="text" value="untitled" /></label>
+          <label>日期<input id="date" type="date" /></label>
+          <label>摘要<textarea id="excerpt" rows="4"></textarea></label>
+          <button id="loadProject" type="button" disabled>读取项目文章</button>
+          <button id="savePost" class="primary" type="button" disabled>安全写入主框架</button>
+        </aside>
+        <section class="editor-panel">
+          <div class="panel-heading">
+            <h2>Markdown 正文</h2>
+            <span id="projectPath">尚未选择项目</span>
+          </div>
+          <textarea id="body" spellcheck="false"># 新文章\n\n在这里开始写作。</textarea>
+          <div class="editor-footer">
+            <span id="analysis">0 字</span>
+            <button id="exportMarkdown" type="button">导出 Markdown</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="log-panel">
+        <h2>操作日志</h2>
+        <pre id="log" aria-live="polite">尚未执行操作。</pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
