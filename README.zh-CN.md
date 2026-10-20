@@ -21,6 +21,7 @@
 - SCSS 设计令牌、mixins 与增量样式层
 - KaTeX 公式渲染
 - 独立 Markdown 编辑器
+- 可选的 Tauri v2 + Rust 桌面编辑器原型
 - 公式编辑器：模板、矩阵、颜色、字体、环境、收藏夹
 - 编辑器源码/可视化模式
 - 编辑器文章切换和草稿保存
@@ -77,6 +78,11 @@ src/
 
 public/
 └── editor.html              # 独立 Markdown/LaTeX 编辑器
+
+narcard-editor/              # 可选的 Tauri v2 + Rust 桌面编辑器原型
+├── index.html                # 桌面编辑器外壳
+├── src/main.js              # 前端通信桥接与编辑器交互
+└── src-tauri/                # Rust 命令、权限和 Tauri 配置
 
 astro.config.mjs             # Astro 配置和站点 URL
 package.json                 # 项目脚本与依赖
@@ -140,6 +146,43 @@ src/data/posts.ts
 - 选择目录后的一键导入
 
 浏览器的 File System Access API 需要用户明确选择目录并授予权限。模板不会绕过浏览器权限，也不会在后台上传本地文件。
+
+### 可选的 Tauri 编辑器
+
+仓库中另外提供了一个位于 `narcard-editor/` 的独立桌面编辑器原型。它与 Astro 根项目分开维护，这样在测试原生文件操作时，现有网站和浏览器编辑器仍然可以正常使用。
+
+当前 Tauri 原型支持：
+
+- 选择并校验 Astro 项目目录
+- 检查 `src/data/posts.ts` 和 `src/pages/index.astro`
+- 读取首页文章数量
+- 在写入前校验 slug 和 ISO 日期
+- 检测重复 slug
+- 向首页文章系统写入新文章
+- 替换源文件前自动创建 `.bak` 备份
+- 使用临时文件进行替换，并处理 Windows 文件替换差异
+- 基础 Markdown 转 HTML，并对 HTML 特殊字符进行转义
+- 浏览器预览模式下导出 Markdown
+
+当前原型只写入首页文章系统，不会自动同步 `src/content/blog/*.md`，也暂不负责封面图片处理、Git 发布或替换现有浏览器编辑器。这些功能会在文件写入流程稳定后再分阶段加入。
+
+安装并运行桌面原型：
+
+```bash
+cd narcard-editor
+bun install
+bun run tauri:dev
+```
+
+Rust 检查命令需要在 `narcard-editor/src-tauri/` 目录执行：
+
+```bash
+cargo fmt --check
+cargo test
+cargo check
+```
+
+第一次测试写入前，建议使用 Astro 项目的副本，不要直接操作唯一的工作副本。桌面编辑器会创建备份，但使用临时项目更适合验证异常和回滚流程。Windows 开发还需要 Rust/Cargo、Microsoft C++ Build Tools 和 WebView2。
 
 ## SCSS
 
