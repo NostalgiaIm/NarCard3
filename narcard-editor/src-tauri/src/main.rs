@@ -1,3 +1,5 @@
+mod storage;
+
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -20,7 +22,36 @@ struct ProjectInfo {
     root: String,
     posts_path: String,
     index_path: String,
+    markdown_path: String,
     posts_count: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProjectSnapshot {
+    project: ProjectInfo,
+    posts_text: String,
+    index_text: String,
+    posts_version: String,
+    index_version: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MarkdownEntry {
+    filename: String,
+    size: u64,
+    modified_ms: u128,
+    version: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MarkdownDocument {
+    filename: String,
+    content: String,
+    size: u64,
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -31,6 +62,27 @@ struct PostInput {
     date: String,
     excerpt: String,
     body: String,
+    posts_version: Option<String>,
+    index_version: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MarkdownWriteInput {
+    root: String,
+    markdown_dir: String,
+    filename: String,
+    content: String,
+    mode: String,
+    expected_version: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct WriteResult {
+    filename: String,
+    version: String,
+    backup: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -40,86 +92,166 @@ struct SaveResult {
     backups: Vec<String>,
 }
 
-fn command_error(message: impl Into<String>) -> String {
-    message.into()
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GeneratedPostInput {
+    root: String,
+    slug: String,
+    function_name: String,
+    post_line: String,
+    body_code: String,
+    posts_version: Option<String>,
+    index_version: Option<String>,
 }
 
-fn expected_files(root: &str) -> Result<(PathBuf, PathBuf), String> {
-    let root_path = PathBuf::from(root);
-    if !root_path.is_absolute() {
-        return Err(command_error("项目路径必须是绝对路径。"));
-    }
-    if !root_path.is_dir() {
-        return Err(command_error("项目路径不是目录。"));
-    }
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CoverInput {
+    root: String,
+    filename: String,
+    bytes: Vec<u8>,
+}
 
-    let posts = root_path.join("src").join("data").join("posts.ts");
-    let index = root_path.join("src").join("pages").join("index.astro");
-    if !posts.is_file() || !index.is_file() {
-        return Err(command_error(
-            "目录结构不匹配：需要 src/data/posts.ts 和 src/pages/index.astro。",
-        ));
-    }
-    Ok((posts, index))
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SitePost {
+    slug: String,
+    title: String,
+    iso: String,
+    display: String,
+    tags: Vec<String>,
+    category: String,
+    excerpt: String,
+    cover: String,
+    cover_alt: String,
+    cover_position: String,
+    body: String,
+}
+
+#[derive(Debug, Serialize)]
+struct SiteTag {
+    tag: String,
+    count: usize,
+}
+
+#[derive(Debug, Serialize)]
+struct SiteData {
+    posts: Vec<SitePost>,
+    tags: Vec<SiteTag>,
+}
+
+fn command_error(message: impl Into<String>) -> String {
+    message.into()
 }
 
 fn count_posts(posts: &str) -> usize {
     posts.matches("{ slug:").count()
 }
 
-fn atomic_write(path: &Path, content: &str) -> Result<(), String> {
-    let temp = path.with_extension(format!(
-        "{}{}.tmp",
-        path.extension().and_then(|v| v.to_str()).unwrap_or(""),
-        std::process::id()
-    ));
-    fs::write(&temp, content).map_err(|error| format!("写入临时文件失败：{error}"))?;
-    if let Err(error) = replace_file(&temp, path) {
-        let _ = fs::remove_file(&temp);
-        return Err(format!("替换文件失败：{error}"));
+fn source_string_at(value: &str, start: usize) -> Option<(String, usize)> {
+    let tail = value.get(start..)?.trim_start();
+    let offset = value.len() - tail.len();
+    let quote = tail.chars().next()?;
+
+    if quote != '\'' && quote != '"' {
+        return None;
     }
-    Ok(())
+
+    let mut escaped = false;
+    let mut output = String::new();
+
+    for (index, character) in tail.char_indices().skip(1) {
+        if escaped {
+            output.push(character);
+            escaped = false;
+            continue;
+        }
+
+        if character == '\\' {
+            escaped = true;
+            continue;
+        }
+
+        if character == quote {
+            return Some((output, offset + index + character.len_utf8()));
+        }
+
+        output.push(character);
+    }
+
+    None
 }
 
-fn replace_file(temp: &Path, destination: &Path) -> Result<(), String> {
-    #[cfg(windows)]
-    {
-        // Windows cannot rename over an existing file, so remove only after the
-        // complete temporary file has been written and flushed by fs::write.
-        let old = destination.with_extension(format!(
-            "{}{}.old",
-            destination
-                .extension()
-                .and_then(|v| v.to_str())
-                .unwrap_or(""),
-            std::process::id()
-        ));
-        if old.exists() {
-            fs::remove_file(&old).map_err(|error| format!("清理临时备份失败：{error}"))?;
-        }
-        if destination.exists() {
-            fs::rename(destination, &old).map_err(|error| format!("准备替换文件失败：{error}"))?;
-        }
-        if let Err(error) = fs::rename(temp, destination) {
-            if old.exists() {
-                let _ = fs::rename(&old, destination);
-            }
-            return Err(error.to_string());
-        }
-        let _ = fs::remove_file(old);
-        Ok(())
+fn field_string(line: &str, field: &str) -> String {
+    let marker = format!("{}:", field);
+    let Some(start) = line.find(&marker).map(|value| value + marker.len()) else {
+        return String::new();
+    };
+    source_string_at(line, start)
+        .map(|(value, _)| value)
+        .unwrap_or_default()
+}
+
+fn site_data_from_posts(posts: &str) -> SiteData {
+    let mut result = Vec::new();
+    for line in posts.lines().filter(|line| line.contains("{ slug:")) {
+        let tags = line
+            .split("tags: [")
+            .nth(1)
+            .and_then(|value| value.split(']').next())
+            .map(|value| {
+                value
+                    .split(',')
+                    .map(|item| item.trim().trim_matches(['\'', '"']).to_string())
+                    .filter(|item| !item.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default();
+        result.push(SitePost {
+            slug: field_string(line, "slug"),
+            title: field_string(line, "title"),
+            iso: field_string(line, "iso"),
+            display: field_string(line, "display"),
+            tags,
+            category: field_string(line, "category"),
+            excerpt: field_string(line, "excerpt"),
+            cover: field_string(line, "cover"),
+            cover_alt: field_string(line, "coverAlt"),
+            cover_position: field_string(line, "coverPosition"),
+            body: String::new(),
+        });
     }
-    #[cfg(not(windows))]
-    {
-        fs::rename(temp, destination).map_err(|error| error.to_string())
+    let mut counts = std::collections::BTreeMap::new();
+    for post in &result {
+        for tag in &post.tags {
+            *counts.entry(tag.clone()).or_insert(0) += 1;
+        }
+    }
+    SiteData {
+        posts: result,
+        tags: counts
+            .into_iter()
+            .map(|(tag, count)| SiteTag { tag, count })
+            .collect(),
     }
 }
 
-fn backup_and_write(path: &Path, original: &str, content: &str) -> Result<PathBuf, String> {
-    let backup = PathBuf::from(format!("{}.bak", path.display()));
-    fs::write(&backup, original).map_err(|error| format!("创建备份失败：{error}"))?;
-    atomic_write(path, content)?;
-    Ok(backup)
+fn project_info(root: &Path, posts: &Path, index: &Path) -> Result<ProjectInfo, String> {
+    let markdown = root.join("src/content/blog");
+    let posts_text = storage::read_utf8(posts)?;
+    Ok(ProjectInfo {
+        root: root.display().to_string(),
+        posts_path: posts.display().to_string(),
+        index_path: index.display().to_string(),
+        markdown_path: markdown.display().to_string(),
+        posts_count: count_posts(&posts_text),
+    })
+}
+
+fn validated_project(root: &str) -> Result<(PathBuf, PathBuf, PathBuf, PathBuf), String> {
+    let (root, posts, index) = storage::project_paths(root)?;
+    let markdown = root.join("src/content/blog");
+    Ok((root, posts, index, markdown))
 }
 
 fn js_string(value: &str) -> Result<String, String> {
@@ -131,10 +263,24 @@ fn date_parts(date: &str) -> Option<(u32, u32, u32)> {
     let year = parts.next()?.parse::<u32>().ok()?;
     let month = parts.next()?.parse::<u32>().ok()?;
     let day = parts.next()?.parse::<u32>().ok()?;
-    if parts.next().is_some() || !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+    if parts.next().is_some() || !(1..=12).contains(&month) || year < 1 {
         return None;
     }
-    Some((year, month, day))
+    let leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days = match month {
+        2 if leap => 29,
+        2 => 28,
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
+    };
+    (1..=days).contains(&day).then_some((year, month, day))
+}
+
+fn valid_date(date: &str) -> bool {
+    date.len() == 10
+        && date.as_bytes()[4] == b'-'
+        && date.as_bytes()[7] == b'-'
+        && date_parts(date).is_some()
 }
 
 fn has_existing_slug(posts: &str, slug: &str) -> bool {
@@ -159,13 +305,6 @@ fn format_post_line(post: &PostInput) -> Result<String, String> {
     ))
 }
 
-fn valid_date(date: &str) -> bool {
-    date.len() == 10
-        && date.as_bytes()[4] == b'-'
-        && date.as_bytes()[7] == b'-'
-        && date_parts(date).is_some()
-}
-
 fn escape_html(value: &str) -> String {
     value
         .replace('&', "&amp;")
@@ -184,7 +323,6 @@ fn markdown_to_html(markdown: &str) -> String {
             paragraph.clear();
         }
     };
-
     for line in markdown.lines() {
         let trimmed = line.trim();
         if trimmed.is_empty() {
@@ -219,6 +357,27 @@ fn format_body_function(post: &PostInput) -> Result<String, String> {
     ))
 }
 
+fn validate_post_input(post: &PostInput) -> Result<(), String> {
+    if post.slug.is_empty()
+        || !post
+            .slug
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || character == '-')
+    {
+        return Err(command_error("Slug 只能包含 ASCII 字母、数字和连字符。"));
+    }
+    if post.slug.contains("..") || post.slug.len() > 100 {
+        return Err(command_error("Slug 不能包含路径片段，且长度不能超过 100。"));
+    }
+    if !valid_date(&post.date) {
+        return Err(command_error("日期必须使用有效的 YYYY-MM-DD 格式。"));
+    }
+    if post.body.len() as u64 > storage::MAX_FILE_BYTES {
+        return Err(command_error("正文超过 5 MB 大小限制。"));
+    }
+    Ok(())
+}
+
 #[tauri::command]
 fn get_app_info() -> AppInfo {
     AppInfo {
@@ -229,46 +388,276 @@ fn get_app_info() -> AppInfo {
 }
 
 #[tauri::command]
-fn validate_project(root: String) -> Result<ProjectInfo, String> {
-    let (posts, index) = expected_files(&root)?;
-    let posts_text =
-        fs::read_to_string(&posts).map_err(|error| format!("读取 posts.ts 失败：{error}"))?;
-    Ok(ProjectInfo {
-        root,
-        posts_path: posts.display().to_string(),
-        index_path: index.display().to_string(),
-        posts_count: count_posts(&posts_text),
-    })
+fn read_site_data(root: String) -> Result<SiteData, String> {
+    let (_, posts_path, _, _) = validated_project(&root)?;
+    let posts = storage::read_utf8(&posts_path)?;
+    Ok(site_data_from_posts(&posts))
 }
 
 #[tauri::command]
-fn read_project(root: String) -> Result<ProjectInfo, String> {
-    validate_project(root)
+fn write_cover(input: CoverInput) -> Result<String, String> {
+    let (root, _, _, _) = validated_project(&input.root)?;
+    let filename = input.filename.rsplit('/').next().unwrap_or(&input.filename);
+    if filename.contains('\\')
+        || filename.contains("..")
+        || !filename
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
+    {
+        return Err("封面文件名不安全。".into());
+    }
+    if input.bytes.len() > 8 * 1024 * 1024 {
+        return Err("封面超过 8 MB 大小限制。".into());
+    }
+    let covers = root.join("public/images/covers");
+    fs::create_dir_all(&covers).map_err(|error| format!("创建封面目录失败：{error}"))?;
+    let path = covers.join(filename);
+    // 使用受控的原子字节替换，避免覆盖过程中留下半截图片。
+    storage::atomic_replace_bytes(&path, &input.bytes)?;
+    Ok(format!("/images/covers/{}", filename))
 }
 
 #[tauri::command]
-fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
-    if post.slug.is_empty()
-        || !post
+fn write_generated_post(input: GeneratedPostInput) -> Result<SaveResult, String> {
+    if input.slug.is_empty()
+        || !input
             .slug
             .chars()
             .all(|c| c.is_ascii_alphanumeric() || c == '-')
     {
-        return Err(command_error("Slug 只能包含 ASCII 字母、数字和连字符。"));
+        return Err("Slug 只能包含 ASCII 字母、数字和连字符。".into());
     }
-    if post.slug.contains("..") {
-        return Err(command_error("Slug 不能包含路径片段。"));
+    let (_, posts_path, index_path, _) = validated_project(&input.root)?;
+    let posts_text = storage::read_utf8(&posts_path)?;
+    let index_text = storage::read_utf8(&index_path)?;
+    if let Some(expected) = input.posts_version.as_deref() {
+        if expected != storage::version(&posts_text) {
+            return Err("posts.ts 已被外部修改，请重新加载。".into());
+        }
     }
-    if !valid_date(&post.date) {
-        return Err(command_error("日期必须使用 YYYY-MM-DD 格式。"));
+    if let Some(expected) = input.index_version.as_deref() {
+        if expected != storage::version(&index_text) {
+            return Err("index.astro 已被外部修改，请重新加载。".into());
+        }
     }
+    if has_existing_slug(&posts_text, &input.slug) {
+        return Err("已存在同 slug 文章，未执行写入。".into());
+    }
+    let posts_at = posts_text
+        .rfind("] as const;")
+        .ok_or("无法定位 posts.ts 插入位置。")?;
+    let mut next_posts = posts_text.clone();
+    next_posts.insert_str(posts_at, &format!("  {}\n", input.post_line));
+    let index_at = index_text
+        .find("function articleBody(post: DemoPost) {")
+        .ok_or("无法定位 articleBody 插入位置。")?;
+    let mut next_index = index_text.clone();
+    next_index.insert_str(index_at, &format!("{}\n", input.body_code));
+    let branch_at = next_index
+        .find("function articleBody(post: DemoPost) {\n")
+        .ok_or("无法定位正文分支位置。")?
+        + "function articleBody(post: DemoPost) {\n".len();
+    let fn_parts: Vec<&str> = input
+        .slug
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|part| !part.is_empty())
+        .collect();
+    let fn_suffix = if fn_parts.is_empty() {
+        format!(
+            "{:x}",
+            input
+                .slug
+                .bytes()
+                .fold(2166136261u32, |hash, byte| hash.wrapping_mul(16777619)
+                    ^ u32::from(byte))
+        )
+    } else {
+        fn_parts
+            .iter()
+            .map(|part| {
+                let mut chars = part.chars();
+                chars
+                    .next()
+                    .map(|first| first.to_uppercase().to_string() + chars.as_str())
+                    .unwrap_or_default()
+            })
+            .collect::<String>()
+    };
+    let function_name = format!("postBody{}Body", fn_suffix);
+    if input.function_name != function_name
+        || !input
+            .body_code
+            .contains(&format!("function {}()", function_name))
+    {
+        return Err("生成的正文函数名称与 slug 不匹配。".into());
+    }
+    next_index.insert_str(
+        branch_at,
+        &format!(
+            "  if (post.slug === {:?}) return {}();\n",
+            input.slug, function_name
+        ),
+    );
+    let posts_backup = storage::write_with_backup(&posts_path, &posts_text, &next_posts)?;
+    let index_backup = match storage::write_with_backup(&index_path, &index_text, &next_index) {
+        Ok(path) => path,
+        Err(error) => {
+            let _ = storage::atomic_replace(&posts_path, &posts_text);
+            return Err(format!("写入 index.astro 失败，已恢复 posts.ts：{error}"));
+        }
+    };
+    Ok(SaveResult {
+        slug: input.slug,
+        backups: vec![
+            posts_backup.display().to_string(),
+            index_backup.display().to_string(),
+        ],
+    })
+}
 
-    let (posts_path, index_path) = expected_files(&root)?;
-    let posts_text =
-        fs::read_to_string(&posts_path).map_err(|error| format!("读取 posts.ts 失败：{error}"))?;
-    let index_text = fs::read_to_string(&index_path)
-        .map_err(|error| format!("读取 index.astro 失败：{error}"))?;
+#[tauri::command]
+fn validate_project(root: String) -> Result<ProjectInfo, String> {
+    let (root, posts, index, _) = validated_project(&root)?;
+    project_info(&root, &posts, &index)
+}
 
+#[tauri::command]
+fn read_project(root: String) -> Result<ProjectSnapshot, String> {
+    let (root, posts, index, _) = validated_project(&root)?;
+    let posts_text = storage::read_utf8(&posts)?;
+    let index_text = storage::read_utf8(&index)?;
+    Ok(ProjectSnapshot {
+        project: project_info(&root, &posts, &index)?,
+        posts_version: storage::version(&posts_text),
+        index_version: storage::version(&index_text),
+        posts_text,
+        index_text,
+    })
+}
+
+#[tauri::command]
+fn validate_markdown_dir(root: String, markdown_dir: String) -> Result<String, String> {
+    let (_, selected) = storage::canonical_blog_dir(&root, &markdown_dir)?;
+    Ok(selected.display().to_string())
+}
+
+#[tauri::command]
+fn list_markdown(root: String, markdown_dir: String) -> Result<Vec<MarkdownEntry>, String> {
+    let (_, directory) = storage::canonical_blog_dir(&root, &markdown_dir)?;
+    let mut entries = Vec::new();
+    for item in
+        fs::read_dir(&directory).map_err(|error| format!("读取 Markdown 目录失败：{error}"))?
+    {
+        let item = item.map_err(|error| format!("读取目录项失败：{error}"))?;
+        let path = item.path();
+        let metadata =
+            fs::symlink_metadata(&path).map_err(|error| format!("读取目录项信息失败：{error}"))?;
+        let filename = item.file_name().to_string_lossy().to_string();
+        if metadata.file_type().is_symlink() || !metadata.is_file() || !filename.ends_with(".md") {
+            continue;
+        }
+        if storage::safe_markdown_filename(&filename).is_err() {
+            continue;
+        }
+        let content = storage::read_utf8(&path)?;
+        let modified_ms = metadata
+            .modified()
+            .ok()
+            .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|duration| duration.as_millis())
+            .unwrap_or_default();
+        entries.push(MarkdownEntry {
+            filename,
+            size: metadata.len(),
+            modified_ms,
+            version: storage::version(&content),
+        });
+    }
+    entries.sort_by(|left, right| left.filename.cmp(&right.filename));
+    Ok(entries)
+}
+
+#[tauri::command]
+fn read_markdown(
+    root: String,
+    markdown_dir: String,
+    filename: String,
+) -> Result<MarkdownDocument, String> {
+    let (_, directory) = storage::canonical_blog_dir(&root, &markdown_dir)?;
+    let path = storage::markdown_path(&directory, &filename)?;
+    let content = storage::read_utf8(&path)?;
+    let size = fs::metadata(&path)
+        .map_err(|error| format!("读取文件信息失败：{error}"))?
+        .len();
+    Ok(MarkdownDocument {
+        filename,
+        size,
+        version: storage::version(&content),
+        content,
+    })
+}
+
+#[tauri::command]
+fn write_markdown(input: MarkdownWriteInput) -> Result<WriteResult, String> {
+    let (_, directory) = storage::canonical_blog_dir(&input.root, &input.markdown_dir)?;
+    let path = storage::markdown_path(&directory, &input.filename)?;
+    if input.content.len() as u64 > storage::MAX_FILE_BYTES {
+        return Err("Markdown 文件超过 5 MB 大小限制。".into());
+    }
+    let exists = path.exists();
+    let current = if exists {
+        Some(storage::read_utf8(&path)?)
+    } else {
+        None
+    };
+    match input.mode.as_str() {
+        "create" if exists => return Err("目标 Markdown 已存在，请改用覆盖并确认版本。".into()),
+        "create" => {}
+        "overwrite" => {
+            let expected = input
+                .expected_version
+                .ok_or("覆盖 Markdown 必须提供版本指纹。")?;
+            let actual = current
+                .as_deref()
+                .map(storage::version)
+                .ok_or("目标 Markdown 不存在。")?;
+            if expected != actual {
+                return Err("Markdown 已被其他程序修改，请重新读取后再保存。".into());
+            }
+        }
+        _ => return Err("写入模式必须是 create 或 overwrite。".into()),
+    }
+    let backup = current
+        .as_deref()
+        .map(|original| storage::write_with_backup(&path, original, &input.content))
+        .transpose()?
+        .map(|path| path.display().to_string());
+    if backup.is_none() {
+        storage::atomic_replace(&path, &input.content)?;
+    }
+    Ok(WriteResult {
+        filename: input.filename,
+        version: storage::version(&input.content),
+        backup,
+    })
+}
+
+#[tauri::command]
+fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
+    validate_post_input(&post)?;
+    let (root, posts_path, index_path, _) = validated_project(&root)?;
+    let posts_text = storage::read_utf8(&posts_path)?;
+    let index_text = storage::read_utf8(&index_path)?;
+    if let Some(expected) = post.posts_version.as_deref() {
+        if expected != storage::version(&posts_text) {
+            return Err("posts.ts 已被其他程序修改，请重新读取项目后再保存。".into());
+        }
+    }
+    if let Some(expected) = post.index_version.as_deref() {
+        if expected != storage::version(&index_text) {
+            return Err("index.astro 已被其他程序修改，请重新读取项目后再保存。".into());
+        }
+    }
     if !posts_text.contains("export const posts = [") || !posts_text.contains("] as const;") {
         return Err(command_error("posts.ts 结构不匹配，未执行写入。"));
     }
@@ -281,10 +670,9 @@ fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
         return Err(command_error("已存在同 slug 文章，未执行写入。"));
     }
 
-    let posts_anchor = "] as const;";
     let posts_at = posts_text
-        .rfind(posts_anchor)
-        .ok_or_else(|| command_error("无法定位 posts.ts 插入位置。"))?;
+        .rfind("] as const;")
+        .ok_or("无法定位 posts.ts 插入位置。")?;
     let mut next_posts = String::with_capacity(posts_text.len() + 256);
     next_posts.push_str(&posts_text[..posts_at]);
     if !next_posts.ends_with('\n') {
@@ -296,7 +684,7 @@ fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
 
     let index_at = index_text
         .find("function articleBody(post: DemoPost) {")
-        .ok_or_else(|| command_error("无法定位 articleBody 插入位置。"))?;
+        .ok_or("无法定位 articleBody 插入位置。")?;
     let function = format_body_function(&post)?;
     let branch = format!(
         "  if (post.slug === {:?}) return article_{}();\n",
@@ -311,18 +699,18 @@ fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
     let article_open = next_index
         .find("function articleBody(post: DemoPost) {\n")
         .map(|offset| offset + "function articleBody(post: DemoPost) {\n".len())
-        .ok_or_else(|| command_error("无法定位 articleBody 插入位置。"))?;
+        .ok_or("无法定位 articleBody 插入位置。")?;
     next_index.insert_str(article_open, &branch);
 
-    let posts_backup = backup_and_write(&posts_path, &posts_text, &next_posts)?;
-    let index_backup = match backup_and_write(&index_path, &index_text, &next_index) {
+    let posts_backup = storage::write_with_backup(&posts_path, &posts_text, &next_posts)?;
+    let index_backup = match storage::write_with_backup(&index_path, &index_text, &next_index) {
         Ok(path) => path,
         Err(error) => {
-            let _ = fs::copy(&posts_backup, &posts_path);
+            let _ = storage::atomic_replace(&posts_path, &posts_text);
             return Err(format!("index.astro 写入失败，已恢复 posts.ts：{error}"));
         }
     };
-
+    let _ = root;
     Ok(SaveResult {
         slug: post.slug,
         backups: vec![
@@ -338,8 +726,15 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             get_app_info,
+            read_site_data,
+            write_cover,
+            write_generated_post,
             validate_project,
             read_project,
+            validate_markdown_dir,
+            list_markdown,
+            read_markdown,
+            write_markdown,
             save_post
         ])
         .setup(|app| {
@@ -373,8 +768,9 @@ mod tests {
     #[test]
     fn validates_iso_dates() {
         assert!(valid_date("2026-10-21"));
+        assert!(!valid_date("2026-02-29"));
+        assert!(valid_date("2028-02-29"));
         assert!(!valid_date("2026/10/21"));
-        assert!(!valid_date("2026-1-1"));
     }
 
     #[test]

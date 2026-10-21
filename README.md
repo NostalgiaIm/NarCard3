@@ -154,24 +154,26 @@ The repository also contains an independent desktop editor prototype in `narcard
 The Tauri prototype currently supports:
 
 - Selecting and validating an Astro project directory
-- Checking for `src/data/posts.ts` and `src/pages/index.astro`
-- Reading the number of existing home-page articles
-- Validating slugs and ISO dates before writing
-- Detecting duplicate slugs
+- Checking for `src/data/posts.ts`, `src/pages/index.astro`, and `src/content/blog`
+- Reading home-page article counts, source contents, and version fingerprints
+- Validating slugs and real ISO dates before writing
+- Detecting duplicate slugs and external file changes
 - Writing a new article into the home-page article system
+- Listing, reading, creating, and overwriting `src/content/blog/*.md`
+- Restricting Markdown filenames to safe slugs and rejecting traversal, symlinks, and oversized files
 - Creating `.bak` backups before replacing source files
 - Using temporary files during replacement, including Windows handling
 - Basic Markdown-to-HTML conversion with HTML escaping
 - Markdown export when running in browser preview mode
 
-The current prototype writes only to the home-page article system. It does not automatically synchronize `src/content/blog/*.md`, process cover images, publish through Git, or replace the existing browser editor. Those capabilities are intentionally left for later stages.
+The two article systems remain separate in this prototype: saving one does not silently write to the other. Cover processing, Git publishing, and replacing the existing browser editor are still planned for later stages.
 
 To install and run the desktop prototype:
 
 ```bash
 cd narcard-editor
-bun install
-bun run tauri:dev
+npm install
+npm run tauri:dev
 ```
 
 Rust checks can be run from `narcard-editor/src-tauri/`:

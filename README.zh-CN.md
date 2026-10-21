@@ -154,24 +154,26 @@ src/data/posts.ts
 当前 Tauri 原型支持：
 
 - 选择并校验 Astro 项目目录
-- 检查 `src/data/posts.ts` 和 `src/pages/index.astro`
-- 读取首页文章数量
-- 在写入前校验 slug 和 ISO 日期
-- 检测重复 slug
+- 检查 `src/data/posts.ts`、`src/pages/index.astro` 和 `src/content/blog`
+- 读取首页文章数量、文件内容和版本指纹
+- 在写入前校验 slug 和有效 ISO 日期
+- 检测重复 slug 和外部文件修改
 - 向首页文章系统写入新文章
+- 列出、读取、新建和覆盖 `src/content/blog/*.md`
+- Markdown 文件名限制为安全 slug，拒绝路径穿越、符号链接和超大文件
 - 替换源文件前自动创建 `.bak` 备份
 - 使用临时文件进行替换，并处理 Windows 文件替换差异
 - 基础 Markdown 转 HTML，并对 HTML 特殊字符进行转义
 - 浏览器预览模式下导出 Markdown
 
-当前原型只写入首页文章系统，不会自动同步 `src/content/blog/*.md`，也暂不负责封面图片处理、Git 发布或替换现有浏览器编辑器。这些功能会在文件写入流程稳定后再分阶段加入。
+当前原型仍然分别处理首页文章系统和 Markdown 内容集合，不会隐式双写；封面图片处理、Git 发布和替换现有浏览器编辑器仍留待后续阶段。
 
 安装并运行桌面原型：
 
 ```bash
 cd narcard-editor
-bun install
-bun run tauri:dev
+npm install
+npm run tauri:dev
 ```
 
 Rust 检查命令需要在 `narcard-editor/src-tauri/` 目录执行：
