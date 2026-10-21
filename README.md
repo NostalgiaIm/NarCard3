@@ -65,6 +65,15 @@ npm run preview
 
 The build output is written to `dist/`. The `dist/` directory is excluded by `.gitignore` and should not normally be committed.
 
+## Architecture
+
+NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:
+
+- Astro owns routes, build-time data, SEO, RSS, and content collections.
+- `src/styles/` owns design tokens, mixins, and shared Markdown enhancements; layouts import the SCSS layer at the top level.
+- `public/editor.html` remains the browser editor and keeps its File System Access API fallback.
+- `narcard-editor/` is an independent Tauri v2 + Rust desktop editor and is not part of the Astro site build.
+
 ## Project structure
 
 ```text
@@ -197,6 +206,15 @@ src/styles/scss-enhancements.scss
 ```
 
 The existing `global.css` is intentionally preserved. SCSS provides scoped enhancements for shared blog and Markdown layouts, reducing migration risk.
+
+## Maintenance checklist
+
+- Keep build-time page logic and data decisions in Astro frontmatter or the relevant component data section.
+- Put new shared styles in `src/styles/*.scss` instead of creating duplicate page-level CSS.
+- Do not change stable runtime boundaries only to influence language statistics.
+- Run `npm run check` and `npm run build` after Astro or SCSS changes.
+- After Tauri changes, also run `cargo test` and `cargo check` from `narcard-editor/src-tauri/`.
+- Before committing, remove build products, debug logs, and dead code; confirm `git status` does not include `node_modules` or `target`.
 
 ## SEO and site configuration
 

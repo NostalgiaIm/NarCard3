@@ -65,6 +65,15 @@ npm run preview
 
 构建产物会生成到 `dist/`。`dist/` 已被 `.gitignore` 排除，不建议提交到仓库。
 
+## 架构说明
+
+NarCard3 采用 Astro 主站、SCSS 样式层和独立 Tauri/Rust 编辑器的组合结构：
+
+- Astro 负责页面路由、构建期数据、SEO、RSS 和内容集合。
+- `src/styles/` 集中维护设计令牌、mixins 和共享 Markdown 样式；布局通过顶层 import 接入。
+- `public/editor.html` 是浏览器编辑器入口，保留 File System Access API fallback。
+- `narcard-editor/` 是独立的 Tauri v2 + Rust 桌面编辑器，不参与 Astro 主站构建。
+
 ## 项目结构
 
 ```text
@@ -197,6 +206,15 @@ src/styles/scss-enhancements.scss
 ```
 
 现有 `global.css` 保留不动，SCSS 只对共享博客/Markdown 布局提供增强样式，以降低迁移风险。
+
+## 日常维护清单
+
+- 新增页面逻辑优先放在 Astro frontmatter 或对应组件的数据区域。
+- 新增共享样式统一放入 `src/styles/*.scss`，不要重复创建页面级 CSS。
+- 不要为了提高语言统计占比而改动已经稳定的运行时边界。
+- 修改后运行 `npm run check` 和 `npm run build`。
+- Tauri 修改后额外运行 `cd narcard-editor/src-tauri`、`cargo test` 和 `cargo check`。
+- 提交前清理构建产物、调试日志和无效代码，确认 `git status` 没有误加入 `node_modules` 或 `target`。
 
 ## SEO 与站点配置
 
