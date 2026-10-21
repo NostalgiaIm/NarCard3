@@ -1,5 +1,5 @@
----
-import '../styles/global.css';
+﻿---
+import '../styles/global.scss';
 import '../styles/scss-enhancements.scss';
 import BackgroundMusic from '../components/global/BackgroundMusic.astro';
 
@@ -15,7 +15,7 @@ interface Props {
 
 const {
   title,
-  description = 'A Gothic Journal — Where shadows write and silence speaks.',
+  description = 'A Gothic Journal â€” Where shadows write and silence speaks.',
   image,
   article = false,
   publishDate,
@@ -23,7 +23,7 @@ const {
   author = 'Example Journal',
 } = Astro.props;
 const siteName = 'Example Journal';
-const pageTitle = title === siteName ? title : `${title} — ${siteName}`;
+const pageTitle = title === siteName ? title : `${title} â€” ${siteName}`;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
 const imageUrl = image ? new URL(image, Astro.site ?? Astro.url).toString() : undefined;
 const jsonLd = {
@@ -92,3 +92,4 @@ const jsonLd = {
   <BackgroundMusic />
 </body>
 </html>
+
