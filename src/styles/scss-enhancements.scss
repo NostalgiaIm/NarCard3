@@ -1,6 +1,8 @@
 @use './tokens' as *;
 @use './mixins' as *;
 
+/* ================= Markdown 内容基础样式 ================= */
+
 // Scoped to the shared Markdown layout so the independent homepage/editor themes
 // keep their existing visual contracts while blog pages gain the SCSS layer.
 .markdown-body {
@@ -29,12 +31,15 @@
     color: $accent-gold;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
+
     @include gold-focus;
   }
 
   pre,
   .code-block {
+    // 代码块使用统一面板混入，保持文章内容与卡片视觉一致。
     @include glass-panel(0.72);
+
     overflow-x: auto;
   }
 
@@ -54,12 +59,17 @@
   }
 }
 
+/* ================= 键盘焦点 ================= */
+
 // Keep keyboard focus visible without changing the existing component markup.
 :where(.markdown-body, .showcase-shell) :focus-visible {
   outline: 2px solid $accent-gold;
   outline-offset: 3px;
 }
 
+/* ================= 减少动态效果 ================= */
+
 :where(.markdown-body, .showcase-shell) {
+  // 统一应用减少动态效果规则，保留现有组件结构。
   @include reduced-motion;
 }

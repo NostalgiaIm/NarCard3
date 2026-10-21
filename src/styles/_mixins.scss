@@ -1,5 +1,11 @@
 @use './tokens' as *;
 
+/* ================= 玻璃面板 ================= */
+
+/**
+ * 创建带模糊效果、边框和阴影的半透明面板。
+ * @param {Number} $alpha - 面板背景透明度
+ */
 @mixin glass-panel($alpha: 0.82) {
   background: rgba(20, 16, 31, $alpha);
   backdrop-filter: blur(12px);
@@ -8,9 +14,19 @@
   box-shadow: $shadow-card;
 }
 
-@mixin gold-focus {
-  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+/* ================= 金色交互焦点 ================= */
 
+/**
+ * 统一链接和交互控件的 hover/focus-visible 金色反馈。
+ */
+@mixin gold-focus {
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+
+  // hover 和键盘焦点共享同一套视觉反馈，避免交互状态不一致。
   &:hover,
   &:focus-visible {
     color: $accent-gold-bright;
@@ -19,7 +35,13 @@
   }
 }
 
+/* ================= 减少动态效果 ================= */
+
+/**
+ * 在用户要求减少动态效果时压缩动画和过渡时长。
+ */
 @mixin reduced-motion {
+  // 遵循 prefers-reduced-motion，避免动画对敏感用户造成干扰。
   @media (prefers-reduced-motion: reduce) {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;

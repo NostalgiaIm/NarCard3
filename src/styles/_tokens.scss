@@ -1,19 +1,26 @@
+/* ================= 设计令牌 ================= */
+
 // Example Journal design tokens for reusable SCSS components.
+
 $bg-deep: #080512;
 $bg-base: #0d0b1a;
 $surface-1: #14101f;
 $surface-2: #1a1728;
+
 $text-main: #f5f1fb;
 $text-soft: #e8e2f2;
 $text-dim: #c4bdd0;
+
 $accent-gold: #d4b57a;
 $accent-gold-bright: #f0daa8;
 $accent-wine: #8c1a4c;
 $accent-purple: #4a3f6b;
+
 $border-soft: rgba(74, 63, 107, 0.2);
 $border: rgba(74, 63, 107, 0.35);
 $glow-gold: 0 0 22px rgba(212, 181, 122, 0.4);
 $shadow-card: 0 24px 60px rgba(0, 0, 0, 0.72);
+
 $font-gothic: 'UnifrakturMaguntia', serif;
 $font-sharp: 'Cinzel', serif;
 $font-body: 'Grenze', 'LXGW WenKai', 'Noto Serif SC', serif;
