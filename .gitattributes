@@ -1,0 +1,25 @@
+# Keep GitHub Linguist aware of the project's primary source languages.
+*.astro linguist-language=Astro
+*.scss linguist-language=SCSS
+
+# Standalone HTML entry points are not the primary application source.
+*.html linguist-detectable=false
+
+# Preserve stable text normalization across platforms.
+*.astro text eol=lf
+*.scss text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.rs text eol=lf
+*.md text eol=lf
+
+# Media files are binary assets, not source text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.mp3 binary

@@ -1,6 +1,12 @@
 ﻿node_modules/
 dist/
 .astro/
+
+# Tauri editor dependencies and build products.
+narcard-editor/node_modules/
+narcard-editor/dist/
+narcard-editor/src-tauri/target/
+narcard-editor/src-tauri/gen/
 .vscode/
 *.bak
 *.prev.html
