@@ -562,8 +562,15 @@ async function writeMarkdownToDirectory(dir){
 }
 if(isTauri){
   window.__narcardProject='';
+  /**
+   * 读取 Tauri 项目数据，并刷新后续写入所需的文件版本快照。
+   * @param {boolean} showToast - 是否显示同步结果
+   */
   loadSiteData=function(showToast){
-    return tInvoke('read_site_data',{root:window.__narcardProject}).then(function(data){
+    return tInvoke('read_project',{root:window.__narcardProject}).then(function(snapshot){
+      window.__narcardSnapshot=snapshot;
+      return tInvoke('read_site_data',{root:window.__narcardProject});
+    }).then(function(data){
       siteData=data||{posts:[],tags:[]};
       editorTags=uniqueList(editorTags.concat(siteData.tags.map(function(item){return item.tag;})));
       persistEditorTags();renderPostMenu();renderTagPicker(meta().tags);updateCurrentPostLabel();
@@ -602,12 +609,12 @@ $('#btnWriteAstro').addEventListener('click',function(){if(isTauri)writeAstroToD
 $('#btnWriteMd').addEventListener('click',selectBlogDirectory);
 $('#btnQuickWriteAstro').addEventListener('click',async function(){
   if(!projectDirHandle){toast('请先选择/设置项目目录',true);return;}
-  if(!await requestDirPermission(projectDirHandle)){toast('目录权限已失效，请重新设置项目目录',true);return;}
+  if(!isTauri&&!await requestDirPermission(projectDirHandle)){toast('目录权限已失效，请重新设置项目目录',true);return;}
   await writeAstroToDirectory(projectDirHandle);
 });
 $('#btnQuickWriteMd').addEventListener('click',async function(){
   if(!blogDirHandle){toast('请先选择/设置 blog 目录',true);return;}
-  if(!await requestDirPermission(blogDirHandle)){toast('目录权限已失效，请重新设置 blog 目录',true);return;}
+  if(!isTauri&&!await requestDirPermission(blogDirHandle)){toast('目录权限已失效，请重新设置 blog 目录',true);return;}
   await writeMarkdownToDirectory(blogDirHandle);
 });
 $('#btnQuickCopyCode').addEventListener('click',function(){const post=$('#codePosts').textContent||'';const body=$('#codeBody').textContent||'';copyText(post+'\n\n'+body).then(function(){toast('两段代码已复制');}).catch(function(){toast('复制失败',true);});});
