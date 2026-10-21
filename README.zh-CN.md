@@ -65,6 +65,10 @@ npm run preview
 
 构建产物会生成到 `dist/`。`dist/` 已被 `.gitignore` 排除，不建议提交到仓库。
 
+## 代码与工程规范
+
+完整规范见 [`CODE_STYLE.md`](./CODE_STYLE.md)，包括 Astro/SCSS 组织、前端排版、注释标准、AI 协作约束、Linguist 配置和提交前检查清单。
+
 ## 架构说明
 
 NarCard3 采用 Astro 主站、SCSS 样式层和独立 Tauri/Rust 编辑器的组合结构：
