@@ -2,6 +2,9 @@
 *.astro linguist-language=Astro
 *.scss linguist-language=SCSS
 
+# Documentation should not outweigh the source language statistics.
+*.md linguist-documentation
+
 # Standalone HTML entry points are not the primary application source.
 *.html linguist-detectable=false
 

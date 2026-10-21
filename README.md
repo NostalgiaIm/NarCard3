@@ -65,6 +65,10 @@ npm run preview
 
 The build output is written to `dist/`. The `dist/` directory is excluded by `.gitignore` and should not normally be committed.
 
+## Code and engineering standards
+
+See [`CODE_STYLE.md`](./CODE_STYLE.md) for the project conventions covering Astro/SCSS organization, frontend formatting, comments, AI-assisted changes, Linguist settings, and pre-commit checks.
+
 ## Architecture
 
 NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:
