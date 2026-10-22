@@ -2615,15 +2615,56 @@ span.tex-fallback { display: inline-block; margin: 0 .15em; vertical-align: midd
   let currentView = initial.view;
   let currentParam = initial.param;
   let lastRoute = { view: 'archive', param: '' };
+  let routeStack = [{ view: currentView, param: currentParam }];
+  let routeIndex = 0;
   let isTransitioning = false;
+  let historyJumping = false;
+  let historyJumpTimer = null;
+  let transitionTimers = [];
 
   function hashFor(view, param) {
     if (view === 'home') return window.location.pathname;
     return '#' + view + (param ? '/' + encodeURIComponent(param) : '');
   }
 
-  function switchView(view, param, updateHash) {
-    if (updateHash === undefined) updateHash = true;
+  // 判断两个视图路由是否相同，避免重复写入浏览器历史。
+  function sameRoute(left, right) {
+    return left.view === right.view && left.param === right.param;
+  }
+
+  // 将当前站内路由栈保存在 History state 中，供 popstate 恢复。
+  function saveRouteHistory(method, route) {
+    const state = {
+      ...(history.state || {}),
+      __nocturneRouteHistory: true,
+      routes: routeStack,
+      index: routeIndex,
+    };
+    const url = hashFor(route.view, route.param);
+    history[method](state, '', url);
+  }
+
+  // 将新导航压入站内历史，并丢弃已前进分支。
+  function pushRoute(route) {
+    const current = routeStack[routeIndex];
+    if (current && sameRoute(current, route)) return;
+    routeStack = routeStack.slice(0, routeIndex + 1);
+    routeStack.push(route);
+    routeIndex = routeStack.length - 1;
+    saveRouteHistory('pushState', route);
+  }
+
+  // 清理幕布动画，避免浏览器前进/后退时旧定时器覆盖目标路由。
+  function cancelTransition() {
+    transitionTimers.forEach(function (timer) { clearTimeout(timer); });
+    transitionTimers = [];
+    if (curtain) curtain.classList.remove('active');
+    if (mark) mark.classList.remove('visible');
+    isTransitioning = false;
+  }
+
+  function switchView(view, param, updateHistory) {
+    if (updateHistory === undefined) updateHistory = true;
     if (!applyView(view, param)) {
       view = 'home';
       param = '';
@@ -2633,11 +2674,10 @@ span.tex-fallback { display: inline-block; margin: 0 .15em; vertical-align: midd
     currentView = view;
     currentParam = param;
 
-    if (updateHash) {
-      const next = hashFor(view, param);
-      if (window.location.hash !== next) {
-        history.replaceState(null, '', next);
-      }
+    if (updateHistory) {
+      const route = { view: view, param: param };
+      lastRoute = routeStack[routeIndex] || lastRoute;
+      pushRoute(route);
     }
 
     if (indicator) {
@@ -2651,26 +2691,42 @@ span.tex-fallback { display: inline-block; margin: 0 .15em; vertical-align: midd
     if (param === undefined) param = '';
     if (isTransitioning) return;
     if (view === currentView && param === currentParam) return;
-    lastRoute = { view: currentView, param: currentParam };
     isTransitioning = true;
+    const route = { view: view, param: param };
 
     // 1. 幕布合拢
     curtain.classList.add('active');
 
     // 2. 幕布合拢完成 → 切换视图 + 显示中央标记
-    setTimeout(function () {
-      switchView(view, param, true);
+    transitionTimers.push(setTimeout(function () {
+      lastRoute = { view: currentView, param: currentParam };
+      switchView(route.view, route.param, true);
       mark.classList.add('visible');
-    }, 520);
+    }, 520));
 
     // 3. 标记开始淡出 + 幕布开始散开
-    setTimeout(function () {
+    transitionTimers.push(setTimeout(function () {
       mark.classList.remove('visible');
       curtain.classList.remove('active');
-    }, 820);
+    }, 820));
 
     // 4. 动画结束
-    setTimeout(function () { isTransitioning = false; }, 1500);
+    transitionTimers.push(setTimeout(function () {
+      isTransitioning = false;
+      transitionTimers = [];
+    }, 1500));
+  }
+
+  // 在站内路由历史边界内移动，不调用浏览器站点之外的历史记录。
+  function moveRouteHistory(direction) {
+    const nextIndex = routeIndex + direction;
+    if (isTransitioning || historyJumping || nextIndex < 0 || nextIndex >= routeStack.length) return false;
+    historyJumping = true;
+    history.go(direction);
+    historyJumpTimer = setTimeout(function () {
+      historyJumping = false;
+    }, 700);
+    return true;
   }
 
   // 暴露给其它脚本（搜索引擎、快捷键）
@@ -2689,11 +2745,16 @@ span.tex-fallback { display: inline-block; margin: 0 .15em; vertical-align: midd
     transitionTo(view, el.getAttribute('data-param') || '');
   }, true);
 
+  // 初始化当前页面的站内历史状态，后续右键手势只在这个栈内移动。
+  saveRouteHistory('replaceState', { view: currentView, param: currentParam });
+
   // 文章详情：返回上一级
   const backBtn = document.getElementById('articleBack');
   if (backBtn) {
     backBtn.addEventListener('click', function () {
-      transitionTo(lastRoute.view || 'archive', lastRoute.param || '');
+      if (!moveRouteHistory(-1)) {
+        transitionTo(lastRoute.view || 'archive', lastRoute.param || '');
+      }
     });
   }
 
@@ -2709,11 +2770,108 @@ span.tex-fallback { display: inline-block; margin: 0 .15em; vertical-align: midd
     item.classList.add('is-clickable');
   });
 
+  // 浏览器历史前进/后退时，只恢复路由，不重新压入历史栈。
+  window.addEventListener('popstate', function (event) {
+    const state = event.state;
+    if (state && state.__nocturneRouteHistory && state.routes && state.routes[state.index]) {
+      cancelTransition();
+      routeStack = state.routes;
+      routeIndex = state.index;
+      const route = routeStack[routeIndex];
+      switchView(route.view, route.param, false);
+      if (historyJumpTimer) clearTimeout(historyJumpTimer);
+      historyJumping = false;
+    }
+  });
+
   window.addEventListener('hashchange', function () {
+    if (history.state && history.state.__nocturneRouteHistory) return;
     const next = parseHash();
     if (next.view !== currentView || next.param !== currentParam) {
+      cancelTransition();
+      routeStack = [{ view: currentView, param: currentParam }, next];
+      routeIndex = 1;
+      saveRouteHistory('replaceState', next);
       switchView(next.view, next.param, false);
     }
+  });
+
+  /* ================= 右键横向导航手势 ================= */
+
+  let gesture = null;
+  let suppressContextMenu = false;
+  let suppressContextMenuTimer = null;
+  const GESTURE_ACTIVATE_DISTANCE = 14;
+  const GESTURE_TRIGGER_DISTANCE = 96;
+
+  // 判断右键手势是否从可安全接管的页面空白区域开始。
+  function isGestureExcludedTarget(target) {
+    const element = target && target.closest ? target.closest('input, textarea, select, button, a, code, pre, [contenteditable="true"], [role="textbox"], [data-view-link]') : null;
+    return Boolean(element);
+  }
+
+  // 清理右键手势状态并恢复页面文本选择。
+  function clearGesture() {
+    if (document.documentElement.style.userSelect === 'none') {
+      document.documentElement.style.userSelect = '';
+    }
+    gesture = null;
+  }
+
+  // 记录鼠标右键按下位置，暂不阻止原生右键菜单。
+  document.addEventListener('pointerdown', function (event) {
+    if (event.pointerType !== 'mouse' || event.button !== 2 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+    if (isGestureExcludedTarget(event.target) || isTransitioning || historyJumping) return;
+    gesture = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+      handled: false,
+    };
+  }, true);
+
+  // 只有达到激活距离后才阻止默认拖拽和文本选择。
+  document.addEventListener('pointermove', function (event) {
+    if (!gesture || event.pointerId !== gesture.pointerId || (event.buttons & 2) === 0) return;
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+    if (!gesture.active && Math.abs(dx) >= GESTURE_ACTIVATE_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      gesture.active = true;
+      document.documentElement.style.userSelect = 'none';
+    }
+    if (gesture.active) event.preventDefault();
+  }, true);
+
+  // 右键横向滑动达到阈值后，移动站内路由历史。
+  document.addEventListener('pointerup', function (event) {
+    if (!gesture || event.pointerId !== gesture.pointerId) return clearGesture();
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+    if (gesture.active && !gesture.handled && Math.abs(dx) >= GESTURE_TRIGGER_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      gesture.handled = true;
+      suppressContextMenu = true;
+      moveRouteHistory(dx < 0 ? -1 : 1);
+      event.preventDefault();
+    }
+    clearGesture();
+  }, true);
+
+  // 有效手势期间屏蔽右键菜单；普通短按右键仍保留浏览器菜单。
+  document.addEventListener('contextmenu', function (event) {
+    if (gesture && gesture.active || suppressContextMenu) {
+      event.preventDefault();
+      event.stopPropagation();
+      suppressContextMenu = false;
+      if (suppressContextMenuTimer) clearTimeout(suppressContextMenuTimer);
+      suppressContextMenuTimer = null;
+    }
+  }, true);
+
+  window.addEventListener('pointercancel', clearGesture, true);
+  window.addEventListener('blur', clearGesture);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) clearGesture();
   });
 
   // 首次进入/刷新时按 URL hash 恢复界面，例如 /#article/xxx、/#tag-detail/Gothic
