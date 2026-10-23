@@ -1,3 +1,5 @@
 @echo off
-cd /d D:\MyyyyDesign\narcard-editor
-bun install
+setlocal
+cd /d "%~dp0"
+npm ci
+exit /b %ERRORLEVEL%

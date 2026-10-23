@@ -4,7 +4,8 @@
   "description": "A gothic Astro journal template with an integrated Markdown editor.",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "generate:posts": "node scripts/generate-posts.mjs",
+    "build": "npm run generate:posts && astro build",
     "preview": "astro preview",
     "sync": "astro sync",
     "check": "astro check"

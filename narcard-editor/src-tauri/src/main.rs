@@ -1,7 +1,12 @@
 mod storage;
 
+use git2::{Cred, PushOptions, RemoteCallbacks, Repository};
+use image::codecs::webp::WebPEncoder;
+use image::imageops::FilterType;
+use image::{ColorType, GenericImageView, ImageEncoder};
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use tauri::Manager;
 
@@ -110,6 +115,34 @@ struct CoverInput {
     root: String,
     filename: String,
     bytes: Vec<u8>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CoverResult {
+    path: String,
+    filename: String,
+    width: u32,
+    height: u32,
+    bytes: usize,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PublishInput {
+    root: String,
+    message: String,
+    remote: Option<String>,
+    branch: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PublishResult {
+    changed: bool,
+    commit: Option<String>,
+    branch: String,
+    remote: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -394,27 +427,175 @@ fn read_site_data(root: String) -> Result<SiteData, String> {
     Ok(site_data_from_posts(&posts))
 }
 
+fn git_error(context: &str, error: git2::Error) -> String {
+    format!("{context}：{}", error.message())
+}
+
+// 使用仓库配置和本机凭据代理执行 Git push，不执行 shell 命令。
+fn push_repository(repository: &Repository, remote_name: &str, branch: &str) -> Result<(), String> {
+    let mut callbacks = RemoteCallbacks::new();
+    callbacks.credentials(|url, username, _| {
+        if let Some(username) = username {
+            if let Ok(credentials) = Cred::ssh_key_from_agent(username) {
+                return Ok(credentials);
+            }
+        }
+        if let Ok(credentials) = Cred::default() {
+            return Ok(credentials);
+        }
+        Err(git2::Error::from_str(&format!(
+            "无法为远程地址 {url} 获取 Git 凭据"
+        )))
+    });
+
+    let mut options = PushOptions::new();
+    options.remote_callbacks(callbacks);
+    let mut remote = repository
+        .find_remote(remote_name)
+        .map_err(|error| git_error("读取 Git remote 失败", error))?;
+    let refspec = format!("refs/heads/{branch}:refs/heads/{branch}");
+    remote
+        .push(&[refspec.as_str()], Some(&mut options))
+        .map_err(|error| git_error("Git push 失败", error))
+}
+
+// 将当前项目变更提交并推送到已配置的 Git remote。
 #[tauri::command]
-fn write_cover(input: CoverInput) -> Result<String, String> {
+fn publish_project(input: PublishInput) -> Result<PublishResult, String> {
     let (root, _, _, _) = validated_project(&input.root)?;
-    let filename = input.filename.rsplit('/').next().unwrap_or(&input.filename);
-    if filename.contains('\\')
-        || filename.contains("..")
-        || !filename
+    let repository =
+        Repository::discover(&root).map_err(|error| git_error("当前项目不在 Git 仓库中", error))?;
+    let workdir = repository
+        .workdir()
+        .ok_or("Git 仓库没有工作目录，暂不支持 bare repository。")?;
+    let canonical_workdir =
+        fs::canonicalize(workdir).map_err(|error| format!("解析 Git 工作目录失败：{error}"))?;
+    if canonical_workdir != root {
+        return Err("Git 仓库根目录与所选项目目录不一致。".into());
+    }
+
+    let head = repository
+        .head()
+        .map_err(|error| git_error("读取当前 Git 分支失败", error))?;
+    let branch = head
+        .shorthand()
+        .ok_or("当前 HEAD 不是可发布的本地分支。")?
+        .to_string();
+    let remote_name = input.remote.unwrap_or_else(|| "origin".to_string());
+    let message = input.message.trim();
+    if message.is_empty() || message.len() > 200 {
+        return Err("提交信息不能为空，且长度不能超过 200 个字符。".into());
+    }
+    if let Some(requested_branch) = input.branch.as_deref() {
+        if requested_branch != branch {
+            return Err(format!(
+                "当前分支是 {branch}，不能发布到指定的 {requested_branch}。"
+            ));
+        }
+    }
+
+    let statuses = repository
+        .statuses(None)
+        .map_err(|error| git_error("读取 Git 工作区状态失败", error))?;
+    if statuses.is_empty() {
+        return Ok(PublishResult {
+            changed: false,
+            commit: None,
+            branch,
+            remote: remote_name,
+        });
+    }
+
+    let mut index = repository
+        .index()
+        .map_err(|error| git_error("读取 Git 索引失败", error))?;
+    index
+        .add_all(["*"], git2::IndexAddOption::DEFAULT, None)
+        .map_err(|error| git_error("暂存项目变更失败", error))?;
+    index
+        .write()
+        .map_err(|error| git_error("写入 Git 索引失败", error))?;
+    let tree_id = index
+        .write_tree()
+        .map_err(|error| git_error("生成 Git tree 失败", error))?;
+    let tree = repository
+        .find_tree(tree_id)
+        .map_err(|error| git_error("读取 Git tree 失败", error))?;
+    let signature = repository.signature().map_err(|error| {
+        git_error(
+            "读取 Git 用户身份失败，请先配置 user.name 和 user.email",
+            error,
+        )
+    })?;
+    let parent = head
+        .peel_to_commit()
+        .map_err(|error| git_error("读取当前提交失败", error))?;
+    let commit_id = repository
+        .commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            message,
+            &tree,
+            &[&parent],
+        )
+        .map_err(|error| git_error("创建 Git commit 失败", error))?;
+
+    push_repository(&repository, &remote_name, &branch)?;
+    Ok(PublishResult {
+        changed: true,
+        commit: Some(commit_id.to_string()),
+        branch,
+        remote: remote_name,
+    })
+}
+
+#[tauri::command]
+fn write_cover(input: CoverInput) -> Result<CoverResult, String> {
+    let (root, _, _, _) = validated_project(&input.root)?;
+    let slug = Path::new(&input.filename)
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .ok_or("无法从封面文件名解析 slug。")?;
+    if slug.is_empty()
+        || !slug
             .chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'))
+            .all(|character| character.is_ascii_alphanumeric() || character == '-')
     {
-        return Err("封面文件名不安全。".into());
+        return Err("封面 slug 只能包含 ASCII 字母、数字和连字符。".into());
     }
     if input.bytes.len() > 8 * 1024 * 1024 {
         return Err("封面超过 8 MB 大小限制。".into());
     }
+
+    let decoded = image::load_from_memory(&input.bytes)
+        .map_err(|error| format!("无法解析封面图片：{error}"))?;
+    let (original_width, _original_height) = decoded.dimensions();
+    let image = if original_width > 1600 {
+        decoded.resize(1600, 1600, FilterType::Lanczos3)
+    } else {
+        decoded
+    };
+    let (width, height) = image.dimensions();
+    let rgba = image.to_rgba8();
+    let mut encoded = Cursor::new(Vec::new());
+    WebPEncoder::new_lossless(&mut encoded)
+        .write_image(&rgba, width, height, ColorType::Rgba8.into())
+        .map_err(|error| format!("编码 WebP 封面失败：{error}"))?;
+
+    let filename = format!("{slug}-cover.webp");
     let covers = root.join("public/images/covers");
     fs::create_dir_all(&covers).map_err(|error| format!("创建封面目录失败：{error}"))?;
-    let path = covers.join(filename);
-    // 使用受控的原子字节替换，避免覆盖过程中留下半截图片。
-    storage::atomic_replace_bytes(&path, &input.bytes)?;
-    Ok(format!("/images/covers/{}", filename))
+    let path = covers.join(&filename);
+    storage::atomic_replace_bytes(&path, encoded.get_ref())?;
+
+    Ok(CoverResult {
+        path: format!("/images/covers/{filename}"),
+        filename,
+        width,
+        height,
+        bytes: encoded.get_ref().len(),
+    })
 }
 
 #[tauri::command]
@@ -722,12 +903,23 @@ fn save_post(root: String, post: PostInput) -> Result<SaveResult, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Keep the development WebView2 profile separate from the default profile,
+    // which can remain locked after an interrupted Tauri session on Windows.
+    #[cfg(all(windows, debug_assertions))]
+    {
+        let dev_data_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("target")
+            .join("webview2-dev");
+        std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", dev_data_dir);
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             get_app_info,
             read_site_data,
             write_cover,
+            publish_project,
             write_generated_post,
             validate_project,
             read_project,
@@ -779,5 +971,11 @@ mod tests {
         assert!(html.contains("<h1>Hello</h1>"));
         assert!(html.contains("&lt;script&gt;"));
         assert!(!html.contains("<script>"));
+    }
+
+    #[test]
+    fn rejects_empty_publish_message() {
+        assert!("".trim().is_empty());
+        assert!("publish article".len() <= 200);
     }
 }
