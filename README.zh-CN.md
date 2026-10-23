@@ -81,9 +81,11 @@ GitHub Actions 会为推送到 `main`、`Exp` 的提交以及以它们为目标�
 
 完整规范见 [`CODE_STYLE.md`](./CODE_STYLE.md)，包括 Astro/SCSS 组织、前端排版、注释标准、AI 协作约束、Linguist 配置和提交前检查清单。
 
-欢迎参与贡献。创建 Issue 或 Pull Request 前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)；疑似安全漏洞请按照 [SECURITY.md](./SECURITY.md) 使用私密渠道报告，不要发布公开 Issue。
+欢迎参与贡献。创建 Issue 或 Pull Request 前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)；问题咨询、早期想法、作品展示和一般交流请使用 [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions)。疑似安全漏洞请按照 [SECURITY.md](./SECURITY.md) 使用私密渠道报告，绝不能发布到 Issue 或 Discussion。
 
 NarCard3 由个人利用业余时间维护，不承诺固定响应 SLA；对于信息完整的 Issue 和 Pull Request，通常会尽量在 7 天内完成初步分类。
+
+桌面端发布前置工作和社区建设里程碑记录在 [ROADMAP.md](./ROADMAP.md)。英文是规范文档主版本；指定的中文配套文档会与用户指南同步维护，并由 `npm run check:docs` 检查结构完整性。
 
 ## 架构说明
 

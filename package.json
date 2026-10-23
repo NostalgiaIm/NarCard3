@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "check:docs": "node scripts/check-docs.mjs",
     "generate:posts": "node scripts/generate-posts.mjs",
     "build": "npm run generate:posts && astro build",
     "preview": "astro preview",

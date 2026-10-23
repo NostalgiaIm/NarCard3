@@ -56,7 +56,25 @@ Windows contributors can run `narcard-editor/setup-windows.cmd` for prerequisite
 4. Update English and Chinese documentation together when behavior or setup changes.
 5. Allow the required GitHub Actions checks to finish before requesting a merge.
 
-Desktop release automation intentionally remains disabled. Do not enable installer publishing until application metadata, platform icons, signing/notarization, updater policy, and platform smoke tests are ready.
+Desktop release automation intentionally remains disabled. Its blocking work is tracked explicitly in [ROADMAP.md](./ROADMAP.md); do not enable installer publishing until that checklist is complete.
+
+## Documentation languages
+
+English is the canonical language for project policy and implementation details. This avoids requiring two independent full policy documents for every small change.
+
+The following user-facing documents are intentionally maintained as complete English/Chinese pairs and must be updated together in the same pull request:
+
+| English | Simplified Chinese |
+| --- | --- |
+| `README.md` | `README.zh-CN.md` |
+| `narcard-editor/README.md` | `narcard-editor/README.zh-CN.md` |
+| `narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.md` | `narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.zh-CN.md` |
+
+`SECURITY.md`, `CONTRIBUTING.md`, and `ROADMAP.md` use a canonical English body with a concise Chinese summary in the same file. Update that summary whenever policy, required commands, security channels, or release gates change. Run `npm run check:docs` before submitting documentation changes.
+
+## Community discussions
+
+Issues are for reproducible bugs and actionable feature work. Use [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions) for questions, early ideas, showcases, and general conversation. Security reports must always use the private channel in [SECURITY.md](./SECURITY.md), never Discussions.
 
 ## Maintainer response rhythm
 
@@ -68,4 +86,4 @@ Please keep discussions respectful, technical, and focused on the project.
 
 提交前请先搜索已有 Issue/PR，按模板提供环境与复现信息；安全问题请通过 [SECURITY.md](./SECURITY.md) 中的私密渠道报告。主站与 Tauri 编辑器是两套独立项目，请分别安装依赖和运行检查；文章元数据应通过 Markdown 自动生成，不要手改 `src/data/posts.ts`。
 
-项目由个人利用业余时间维护，不承诺固定 SLA；通常会尽量在 7 天内初步分类信息完整的 Issue/PR。行为或配置变化请同步更新中英文文档。
+项目由个人利用业余时间维护，不承诺固定 SLA；通常会尽量在 7 天内初步分类信息完整的 Issue/PR。问题咨询、早期想法、作品展示和一般交流请使用 [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions)，安全问题不得发布到 Discussions。英文是规范主版本；完整的中英文配套文档必须在同一 PR 中更新，策略类文档则在同一文件底部维护中文摘要。桌面发布前置工作见 [ROADMAP.md](./ROADMAP.md)。
