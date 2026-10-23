@@ -2,7 +2,7 @@
 
 [简体中文](./README.zh-CN.md)
 
-A complete dark, gothic-inspired Astro blog template with the original visual system, article browsing, archives, tags, gallery, search, Markdown content pages, and an integrated local Markdown/LaTeX editor.
+A complete dark, gothic-inspired Astro blog template with the original visual system, article browsing, an immersive book-style reading mode, archives, tags, gallery, search, Markdown content pages, and an integrated local Markdown/LaTeX editor.
 
 > This repository contains template code and neutral example content. It does not include personal articles, private images, private audio, or local development files.
 >
@@ -14,6 +14,8 @@ A complete dark, gothic-inspired Astro blog template with the original visual sy
 - Dark gothic-inspired visual theme
 - Switchable Blood Moon theme
 - Home page article browsing and detail views
+- Immersive book-style reading mode with synchronized curtain transitions
+- Reading-mode article search, tag filtering, persistent text highlights, and saved panel sizing
 - Archives, tags, gallery, and search entry points
 - Markdown content collection and article routes
 - RSS, sitemap, and robots.txt
@@ -55,6 +57,12 @@ Open the local editor:
 http://localhost:4321/editor.html
 ```
 
+Open the focused reading mode directly:
+
+```text
+http://localhost:4321/read-mode/
+```
+
 ## Build and preview
 
 ```bash
@@ -92,6 +100,7 @@ Deferred desktop release work and community milestones are tracked in [ROADMAP.m
 NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:
 
 - Astro owns routes, build-time data, SEO, RSS, and content collections.
+- The `/read-mode/` Astro route renders the same Markdown collection into an immersive book interface; its article index and tags are generated from the main-site data rather than maintained separately.
 - `src/styles/` owns design tokens, mixins, and shared Markdown enhancements; layouts import the SCSS layer at the top level.
 - `public/editor.html` remains the browser editor and keeps its File System Access API fallback.
 - `narcard-editor/` is an independent Tauri v2 + Rust desktop editor and is not part of the Astro site build.
@@ -104,7 +113,7 @@ src/
 ├── content/blog/            # Markdown example articles
 ├── data/posts.ts            # Generated home page metadata (do not edit manually)
 ├── layouts/                 # Astro layouts and SEO metadata
-├── pages/                   # Home, blog, archive, tag, search, and utility routes
+├── pages/                   # Home, reading mode, blog, archive, tag, search, and utility routes
 └── styles/                  # CSS, SCSS tokens, mixins, and enhancements
 
 public/
@@ -166,6 +175,20 @@ Run the generator manually when needed:
 ```bash
 npm run generate:posts
 ```
+
+## Reading mode
+
+Open `/read-mode/` directly or use the open-book button in the home page's right-side orb menu. Entering and leaving reading mode uses the same curtain transition as the main-site view changes.
+
+Reading mode is driven by the regular Markdown collection:
+
+- Article titles, dates, categories, tags, and summaries come from generated main-site metadata.
+- Article bodies are rendered from `src/content/blog/*.md` during the Astro build.
+- Selecting a tag lists every matching article; selecting an article loads it into the book without leaving reading mode.
+- The left and right orb menus retain access to the main-site sections and reading controls, while explicit exit controls return to the home page.
+- Text highlighting, latest-highlight navigation, theme switching, article scrolling, background music, and the resizable reading index remain available.
+
+Do not maintain a second copy of article content for reading mode. Updating the Markdown source and rebuilding the site updates both the standard article route and the reading interface.
 
 ## Editor
 
