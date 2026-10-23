@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [main, Exp]
+  pull_request:
+    branches: [main, Exp]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Astro site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install website dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Check Astro and TypeScript
+        run: npm run check
+
+      - name: Build website
+        run: npm run build
+
+      - name: Verify generated article data is committed
+        run: git diff --exit-code -- src/data/posts.ts
+
+  editor-frontend:
+    name: Tauri editor frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: narcard-editor
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: narcard-editor/package-lock.json
+
+      - name: Install editor dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build editor frontend
+        run: npm run build
+
+  rust:
+    name: Tauri Rust checks
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: narcard-editor
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify required Tauri assets
+        run: test -f src-tauri/icons/icon.png
+
+      - name: Install Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            curl \
+            file \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            libxdo-dev \
+            wget \
+            patchelf
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: narcard-editor/package-lock.json
+
+      - name: Install and build editor frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: narcard-editor/src-tauri -> target
+
+      - name: Check Rust formatting
+        working-directory: narcard-editor/src-tauri
+        run: cargo fmt --check
+
+      - name: Lint Rust
+        working-directory: narcard-editor/src-tauri
+        run: cargo clippy --locked --no-default-features -- -D warnings
+
+      - name: Test Rust
+        working-directory: narcard-editor/src-tauri
+        run: cargo test --locked --no-default-features

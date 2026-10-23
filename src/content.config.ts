@@ -1,6 +1,7 @@
 // src/content.config.ts
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const blog = defineCollection({
   // 新增：使用 glob loader 告诉 Astro 去哪里读取 Markdown 文件

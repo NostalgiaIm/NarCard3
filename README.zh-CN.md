@@ -30,7 +30,7 @@
 
 ## 环境要求
 
-- Node.js 20.19+ 或 22.12+（当前 Vite 工具链要求）
+- Node.js 22.20+ 或 24.12+（建议使用 `.nvmrc` 中与 CI 一致的版本）
 - npm
 - 支持现代 JavaScript 的浏览器
 
@@ -64,6 +64,18 @@ npm run preview
 ```
 
 构建产物会生成到 `dist/`。`dist/` 已被 `.gitignore` 排除，不建议提交到仓库。
+
+## 持续集成
+
+GitHub Actions 会为推送到 `main`、`Exp` 的提交以及以它们为目标的拉取请求运行三道独立质量闸门：
+
+- Astro 类型/内容检查、生产构建，并确认自动生成的 `src/data/posts.ts` 已提交。
+- 使用编辑器自己的 lockfile 进行全新安装和 Tauri 编辑器前端生产构建。
+- 安装 Linux Tauri 系统依赖，然后执行 Rust 格式检查、禁止警告的 Clippy 和锁定依赖测试。
+
+两个 Node.js 任务都读取 `.nvmrc`，使本地开发与 CI 使用同一版本基线。Dependabot 会分别维护主站 npm、编辑器 npm、Cargo 和 GitHub Actions 依赖；配置进入仓库默认分支后才会正式生效。
+
+项目目前有意不自动发布桌面安装包。`tauri.conf.json` 中的 bundling 尚未启用；应在应用标识、图标、签名/公证、更新策略和各平台冒烟测试准备完成后，再启用 Release 自动化。
 
 ## 代码与工程规范
 

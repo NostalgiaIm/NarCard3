@@ -9,8 +9,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $editorRoot = Split-Path -Parent $PSScriptRoot
-$minimumNode20Version = [Version]"20.19.0"
-$minimumNode22Version = [Version]"22.12.0"
+$minimumNode22Version = [Version]"22.20.0"
+$minimumNode24Version = [Version]"24.12.0"
 $problems = [System.Collections.Generic.List[string]]::new()
 $warnings = [System.Collections.Generic.List[string]]::new()
 
@@ -62,17 +62,17 @@ $cargoCommand = Find-Command "cargo.exe"
 $rustcCommand = Find-Command "rustc.exe"
 
 if (-not $nodeCommand) {
-    $problems.Add("Node.js was not found. Install Node.js 20.19+ LTS from https://nodejs.org/.")
+    $problems.Add("Node.js was not found. Install Node.js 22.20+ LTS from https://nodejs.org/.")
 } else {
     $nodeVersionText = (& $nodeCommand.Source --version).Trim().TrimStart("v")
     $nodeVersion = $null
     if (-not [Version]::TryParse($nodeVersionText, [ref]$nodeVersion)) {
         $problems.Add("Unable to parse the Node.js version: $nodeVersionText")
     } elseif (-not (
-        ($nodeVersion.Major -eq 20 -and $nodeVersion -ge $minimumNode20Version) -or
-        ($nodeVersion.Major -ge 22 -and $nodeVersion -ge $minimumNode22Version)
+        ($nodeVersion.Major -eq 22 -and $nodeVersion -ge $minimumNode22Version) -or
+        ($nodeVersion.Major -ge 24 -and $nodeVersion -ge $minimumNode24Version)
     )) {
-        $problems.Add("Node.js $nodeVersion is unsupported. Install Node.js 20.19+ or 22.12+ (current LTS recommended).")
+        $problems.Add("Node.js $nodeVersion is unsupported. Install Node.js 22.20+ or 24.12+ (current LTS recommended).")
     } else {
         Write-Host "  OK  Node.js $nodeVersion"
     }

@@ -25,7 +25,7 @@ The three `.cmd` files are stable double-click entry points. They resolve files 
 The PowerShell script checks:
 
 1. That the host operating system is Windows.
-2. That `node.exe` exists and is in Vite 7's supported `20.19+` or `22.12+` range.
+2. That `node.exe` exists and satisfies the lockfile baseline: Node.js `22.20+` or `24.12+`.
 3. That `npm.cmd` exists.
 4. That `cargo.exe` and `rustc.exe` exist.
 5. Which host triple is reported by `rustc -vV`.

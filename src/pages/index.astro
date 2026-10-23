@@ -28,14 +28,6 @@ function codeBlock(lang: string, code: string) {
   );
 }
 
-// 数学公式：加载后由 KaTeX 渲染；失败自动降级为源码卡片
-function mathBlock(tex: string) {
-  return '<div class="tex tex-block" data-tex="' + esc(tex) + '" data-display="1">' + esc(tex) + '</div>';
-}
-function mathInline(tex: string) {
-  return '<span class="tex tex-inline" data-tex="' + esc(tex) + '" data-display="0">' + esc(tex) + '</span>';
-}
-
 function articleBody(post: DemoPost) {
   return [
     `<p><strong>${esc(post.excerpt || 'A short example entry for demonstrating the template.')}</strong></p>`,

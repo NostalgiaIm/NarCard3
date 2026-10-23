@@ -2,6 +2,9 @@
   "name": "example-journal-template",
   "version": "1.0.0",
   "description": "A gothic Astro journal template with an integrated Markdown editor.",
+  "engines": {
+    "node": "^22.20.0 || >=24.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "generate:posts": "node scripts/generate-posts.mjs",
