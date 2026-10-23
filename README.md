@@ -81,6 +81,10 @@ The repository intentionally does not publish desktop installers automatically y
 
 See [`CODE_STYLE.md`](./CODE_STYLE.md) for the project conventions covering Astro/SCSS organization, frontend formatting, comments, AI-assisted changes, Linguist settings, and pre-commit checks.
 
+Contributions are welcome. Before opening an issue or pull request, read [CONTRIBUTING.md](./CONTRIBUTING.md). Report suspected vulnerabilities privately according to [SECURITY.md](./SECURITY.md), not in a public issue.
+
+NarCard3 is maintained by one person in their available time and has no guaranteed response SLA. Well-formed issues and pull requests are normally triaged within 7 days when possible.
+
 ## Architecture
 
 NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:

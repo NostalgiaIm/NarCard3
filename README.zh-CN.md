@@ -81,6 +81,10 @@ GitHub Actions 会为推送到 `main`、`Exp` 的提交以及以它们为目标�
 
 完整规范见 [`CODE_STYLE.md`](./CODE_STYLE.md)，包括 Astro/SCSS 组织、前端排版、注释标准、AI 协作约束、Linguist 配置和提交前检查清单。
 
+欢迎参与贡献。创建 Issue 或 Pull Request 前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)；疑似安全漏洞请按照 [SECURITY.md](./SECURITY.md) 使用私密渠道报告，不要发布公开 Issue。
+
+NarCard3 由个人利用业余时间维护，不承诺固定响应 SLA；对于信息完整的 Issue 和 Pull Request，通常会尽量在 7 天内完成初步分类。
+
 ## 架构说明
 
 NarCard3 采用 Astro 主站、SCSS 样式层和独立 Tauri/Rust 编辑器的组合结构：
