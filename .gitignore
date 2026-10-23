@@ -8,9 +8,8 @@ narcard-editor/dist/
 narcard-editor/src-tauri/target/
 narcard-editor/src-tauri/gen/
 
-# Technical documentation kept locally and removed from the GitHub index.
+# Local-only technical notes.
 LOCAL_TECHNICAL_DOCS.md
-CODE_STYLE.md
 .vscode/
 *.bak
 *.prev.html
