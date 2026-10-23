@@ -260,12 +260,23 @@ function renderCover(){
   if(src){preview.classList.add('has-image');preview.innerHTML='<span class="cover-badge">'+(pendingCoverFile?'待写入':'Cover')+'</span><img src="'+esc(src)+'" alt="'+esc($('#fCoverAlt').value||'封面预览')+'" />';removeBtn.disabled=false;}
   else{preview.classList.remove('has-image');preview.innerHTML='<span class="cover-empty-ico">＋</span><span class="cover-empty-hint">点击 / 拖拽上传</span>';removeBtn.disabled=true;}
 }
-function acceptCoverFile(file){
+async function acceptCoverFile(file){
   if(!file)return;if(!/^image\//.test(file.type)){toast('请选择图片文件',true);return;}if(file.size>8*1024*1024){toast('图片超过 8MB，请先压缩',true);return;}
   if(pendingCoverUrl){URL.revokeObjectURL(pendingCoverUrl);pendingCoverUrl='';}
   pendingCoverFile=file;pendingCoverUrl=URL.createObjectURL(file);currentCover=coverPathFor(file);
   if(!$('#fCoverAlt').value.trim())$('#fCoverAlt').value=$('#fTitle').value.trim()||'封面';
-  renderCover();markDirty();toast('封面已选：'+currentCover);
+  renderCover();markDirty();
+  if(isTauri&&window.__narcardProject){
+    try{
+      const bytes=Array.from(new Uint8Array(await file.arrayBuffer()));
+      const cover=await tInvoke('write_cover',{root:window.__narcardProject,filename:currentCover.split('/').pop(),bytes});
+      currentCover=cover.path;pendingCoverFile=null;
+      if(pendingCoverUrl){URL.revokeObjectURL(pendingCoverUrl);pendingCoverUrl='';}
+      renderCover();toast('封面已压缩为 WebP：'+cover.filename);
+    }catch(err){toast('封面 WebP 处理失败：'+(err&&err.message||err),true);}
+  }else{
+    toast('封面已选：'+currentCover);
+  }
 }
 $('#btnCoverUpload').addEventListener('click',function(){const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp,image/avif,image/gif,image/svg+xml';input.addEventListener('change',function(){acceptCoverFile(input.files&&input.files[0]);});input.click();});
 $('#btnCoverRemove').addEventListener('click',function(){if(!currentCover&&!pendingCoverFile)return;if(pendingCoverUrl){URL.revokeObjectURL(pendingCoverUrl);pendingCoverUrl='';}pendingCoverFile=null;currentCover='';renderCover();markDirty();});
@@ -453,6 +464,26 @@ $$('#moreMenu [data-action]').forEach(function(btn){btn.addEventListener('click'
 $$('#postMenu [data-action]').forEach(function(btn){btn.addEventListener('click',function(){const act=btn.getAttribute('data-action');closeAllMenus();if(act==='reload-site')loadSiteData(true);else if(act==='new')switchPost(null);});});
 function toggleView(){const b=document.body;if(b.classList.contains('mode-write')){b.classList.remove('mode-write');b.classList.add('mode-read');}else if(b.classList.contains('mode-read')){b.classList.remove('mode-read');}else{b.classList.add('mode-write');}}
 $('#btnSave').addEventListener('click',function(){saveDraft(false);});
+
+// 在桌面端确认后提交并推送当前项目的 Git 变更。
+async function publishToGit(){
+  if(!isTauri){toast('Git 发布仅支持 Tauri 桌面版',true);return;}
+  if(!window.__narcardProject){toast('请先选择项目目录',true);return;}
+  const message=window.prompt('请输入 Git commit 信息：','Update article content');
+  if(message===null)return;
+  const trimmed=message.trim();
+  if(!trimmed){toast('提交信息不能为空',true);return;}
+  if(!window.confirm('将提交并推送当前项目到已配置的 Git remote，是否继续？'))return;
+  const button=$('#btnPublishGit');
+  button.disabled=true;
+  try{
+    const result=await tInvoke('publish_project',{root:window.__narcardProject,message:trimmed,remote:'origin'});
+    if(result.changed)toast('已发布 '+result.commit.slice(0,8)+' 到 '+result.remote+'/'+result.branch);
+    else toast('没有需要发布的变更');
+  }catch(err){toast('Git 发布失败：'+(err&&err.message||err),true);}
+  finally{button.disabled=false;}
+}
+$('#btnPublishGit').addEventListener('click',publishToGit);
 function exportFile(){const m=meta();const slug=m.slug||slugify(m.title||'untitled');const blob=new Blob([frontmatterMd()],{type:'text/markdown;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=slug+'.md';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);toast('已导出 '+slug+'.md');}
 function openLocalFile(){const input=document.createElement('input');input.type='file';input.accept='.md,.markdown,.txt';input.addEventListener('change',function(){const f=input.files&&input.files[0];if(!f)return;const reader=new FileReader();reader.onload=function(){let text=String(reader.result);const fm=/^---\n([\s\S]*?)\n---\n?/.exec(text);if(fm){const body=fm[1];const get=k=>{const mm=new RegExp('^'+k+':\\s*(.*)$','m').exec(body);return mm?mm[1].replace(/^["']|["']$/g,'').trim():'';};if(get('title'))$('#fTitle').value=get('title');if(get('description'))$('#fDesc').value=get('description');if(get('pubDate'))$('#fDate').value=get('pubDate').slice(0,10);if(get('category'))$('#fCategory').value=get('category');if(get('cover'))currentCover=get('cover');if(get('coverAlt'))$('#fCoverAlt').value=get('coverAlt');if(get('coverPosition'))$('#fCoverPosition').value=get('coverPosition');const tg=get('tags');if(tg)setTags(tg.replace(/^\[|\]$/g,'').split(',').map(s=>s.replace(/["']/g,'').trim()).filter(Boolean));text=text.slice(fm[0].length);}srcEl.value=text;if(!$('#fSlug').value)$('#fSlug').value=slugify(f.name.replace(/\.(md|markdown|txt)$/i,''));renderCover();lastSaved='';render();markDirty();toast('已打开 '+f.name);};reader.readAsText(f,'utf-8');});input.click();}
 /**
@@ -584,7 +615,7 @@ if(isTauri){
     try{
       if(!window.__narcardProject)throw new Error('尚未设置项目目录');
       const code=buildCode();const snapshot=window.__narcardSnapshot||{};
-      if(pendingCoverFile){const bytes=Array.from(new Uint8Array(await pendingCoverFile.arrayBuffer()));currentCover=await tInvoke('write_cover',{root:window.__narcardProject,filename:currentCover.split('/').pop(),bytes});}
+      if(pendingCoverFile){const bytes=Array.from(new Uint8Array(await pendingCoverFile.arrayBuffer()));const cover=await tInvoke('write_cover',{root:window.__narcardProject,filename:currentCover.split('/').pop(),bytes});currentCover=cover.path;}
       const result=await tInvoke('write_generated_post',{root:window.__narcardProject,slug:code.slug,functionName:code.fn,postLine:code.postLine,bodyCode:code.bodyCode,postsVersion:snapshot.postsVersion,indexVersion:snapshot.indexVersion});
       toast('已同步到主站，备份已生成');await loadSiteData(false);closeModal('#importModal');return result;
     }catch(err){toast('写入失败：'+(err&&err.message||err),true);}

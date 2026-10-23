@@ -30,7 +30,7 @@ A complete dark, gothic-inspired Astro blog template with the original visual sy
 
 ## Requirements
 
-- Node.js 18 or later
+- Node.js 20.19+ or 22.12+ (required by the current Vite toolchain)
 - npm
 - A modern JavaScript-enabled browser
 
@@ -39,7 +39,7 @@ A complete dark, gothic-inspired Astro blog template with the original visual sy
 From the project root:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -84,7 +84,7 @@ NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent 
 src/
 ├── components/              # Global, blog, and UI components
 ├── content/blog/            # Markdown example articles
-├── data/posts.ts            # Home page article metadata
+├── data/posts.ts            # Generated home page metadata (do not edit manually)
 ├── layouts/                 # Astro layouts and SEO metadata
 ├── pages/                   # Home, blog, archive, tag, search, and utility routes
 └── styles/                  # CSS, SCSS tokens, mixins, and enhancements
@@ -93,12 +93,19 @@ public/
 └── editor.html              # Standalone Markdown/LaTeX editor
 
 narcard-editor/              # Optional Tauri v2 + Rust desktop editor prototype
-├── index.html                # Desktop editor shell
-├── src/main.js              # Frontend bridge and editor interactions
+├── README.md                 # Primary English setup and troubleshooting guide
+├── README.zh-CN.md           # Simplified Chinese setup guide
+├── docs/                     # English and Chinese setup implementation notes
+├── setup-windows.cmd         # Auditable first-run setup entry point
+├── doctor-windows.cmd        # Read-only Windows environment diagnosis
+├── start-editor-windows.cmd  # Desktop editor launcher
+├── scripts/                  # PowerShell setup implementation
+├── src/                      # Frontend bridge, interactions, and styles
 └── src-tauri/                # Rust commands, permissions, and Tauri config
 
 astro.config.mjs             # Astro configuration and site URL
 package.json                 # Scripts and dependencies
+scripts/generate-posts.mjs   # Generates home-page metadata from Markdown
 ```
 
 ## Adding articles
@@ -126,15 +133,21 @@ draft: false
 Write your article here.
 ```
 
-### Home page article data
+### Generated home page data
 
-The home page demo list uses:
+`src/data/posts.ts` is generated automatically from the Markdown collection before every production build:
 
 ```text
-src/data/posts.ts
+src/content/blog/*.md  →  scripts/generate-posts.mjs  →  src/data/posts.ts
 ```
 
-Keep slugs, titles, dates, tags, categories, and excerpts consistent when editing the data. A production project may further unify the home-page data and the Markdown content collection.
+Do not edit `src/data/posts.ts` manually. Add or update Markdown frontmatter instead. The generator reads `title`, `description`, `pubDate` (or `date`), `tags`, `category`, `cover`, `coverAlt`, `coverPosition`, `variant`, and `draft`. Draft articles are excluded from the home page data.
+
+Run the generator manually when needed:
+
+```bash
+npm run generate:posts
+```
 
 ## Editor
 
@@ -178,16 +191,28 @@ The Tauri prototype currently supports:
 - Using temporary files during replacement, including Windows handling
 - Basic Markdown-to-HTML conversion with HTML escaping
 - Markdown export when running in browser preview mode
+- Automatic WebP cover compression in the Tauri desktop editor
+- Git commit and push from the Tauri desktop editor
 
-The two article systems remain separate in this prototype: saving one does not silently write to the other. Cover processing, Git publishing, and replacing the existing browser editor are still planned for later stages.
+Markdown is the single article source for the site. The generated `src/data/posts.ts` file is a build-time compatibility layer for the home-page data shape; it is not an independent authoring system. Git publishing modifies the local repository and pushes to the configured remote; configure Git identity and credentials before using it.
 
 To install and run the desktop prototype:
 
 ```bash
 cd narcard-editor
-npm install
+npm ci
 npm run tauri:dev
 ```
+
+On Windows, the recommended first-run path is the auditable one-click setup:
+
+```powershell
+cd narcard-editor
+.\setup-windows.cmd
+.\start-editor-windows.cmd
+```
+
+See the [complete Tauri editor setup and troubleshooting guide](./narcard-editor/README.md) and the [one-click setup implementation notes](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.md). Chinese versions are also available in the [editor guide](./narcard-editor/README.zh-CN.md) and [implementation notes](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.zh-CN.md). The setup checks prerequisites, installs only repository-local npm dependencies, and verifies both frontend and Rust builds; it does not elevate privileges or install system packages silently.
 
 Rust checks can be run from `narcard-editor/src-tauri/`:
 

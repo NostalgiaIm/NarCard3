@@ -30,7 +30,7 @@
 
 ## 环境要求
 
-- Node.js 18 或更高版本
+- Node.js 20.19+ 或 22.12+（当前 Vite 工具链要求）
 - npm
 - 支持现代 JavaScript 的浏览器
 
@@ -39,7 +39,7 @@
 在项目根目录执行：
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -84,7 +84,7 @@ NarCard3 采用 Astro 主站、SCSS 样式层和独立 Tauri/Rust 编辑器的�
 src/
 ├── components/              # 全局、博客和 UI 组件
 ├── content/blog/            # Markdown 示例文章
-├── data/posts.ts            # 首页文章元数据
+├── data/posts.ts            # 自动生成的首页文章元数据（不要手改）
 ├── layouts/                 # Astro 布局与 SEO 元数据
 ├── pages/                   # 首页、博客、归档、标签、搜索等路由
 └── styles/                  # CSS、SCSS 令牌、mixins 和增强样式
@@ -93,12 +93,19 @@ public/
 └── editor.html              # 独立 Markdown/LaTeX 编辑器
 
 narcard-editor/              # 可选的 Tauri v2 + Rust 桌面编辑器原型
-├── index.html                # 桌面编辑器外壳
-├── src/main.js              # 前端通信桥接与编辑器交互
+├── README.md                 # 英文主配置与排错指南
+├── README.zh-CN.md           # 简体中文配置指南
+├── docs/                     # 中英文一键配置实现说明
+├── setup-windows.cmd         # 可审查的首次配置入口
+├── doctor-windows.cmd        # 只读 Windows 环境诊断
+├── start-editor-windows.cmd  # 桌面编辑器启动入口
+├── scripts/                  # PowerShell 配置实现
+├── src/                      # 前端通信、编辑器交互和样式
 └── src-tauri/                # Rust 命令、权限和 Tauri 配置
 
 astro.config.mjs             # Astro 配置和站点 URL
 package.json                 # 项目脚本与依赖
+scripts/generate-posts.mjs   # 从 Markdown 生成首页文章元数据
 ```
 
 ## 添加文章
@@ -126,15 +133,21 @@ draft: false
 Write your article here.
 ```
 
-### 首页文章数据
+### 自动生成的首页文章数据
 
-首页演示列表使用：
+`src/data/posts.ts` 会在每次生产构建前由 Markdown 内容自动生成：
 
 ```text
-src/data/posts.ts
+src/content/blog/*.md  →  scripts/generate-posts.mjs  →  src/data/posts.ts
 ```
 
-修改文章后，请确保 slug、标题、日期、标签、分类和摘要保持一致。正式项目可以进一步统一首页数据和 Markdown 内容集合。
+不要手动修改 `src/data/posts.ts`。以后只需要新增或修改 `src/content/blog/` 下的 Markdown 文件及其 frontmatter。生成器会读取 `title`、`description`、`pubDate`（或 `date`）、`tags`、`category`、`cover`、`coverAlt`、`coverPosition`、`variant` 和 `draft`；`draft: true` 的文章不会进入首页数据。
+
+如需手动生成：
+
+```bash
+npm run generate:posts
+```
 
 ## 编辑器
 
@@ -178,16 +191,28 @@ src/data/posts.ts
 - 使用临时文件进行替换，并处理 Windows 文件替换差异
 - 基础 Markdown 转 HTML，并对 HTML 特殊字符进行转义
 - 浏览器预览模式下导出 Markdown
+- Tauri 桌面端自动压缩封面图为 WebP
+- Tauri 桌面端通过 Git 提交并推送当前项目
 
-当前原型仍然分别处理首页文章系统和 Markdown 内容集合，不会隐式双写；封面图片处理、Git 发布和替换现有浏览器编辑器仍留待后续阶段。
+Markdown 是站点唯一的文章源。生成的 `src/data/posts.ts` 只是首页兼容现有数据结构的构建期产物，不是另一套需要手动维护的文章系统。Git 发布会修改本地仓库并推送到已配置的 remote，首次使用前请配置 Git 用户身份和凭据。
 
 安装并运行桌面原型：
 
 ```bash
 cd narcard-editor
-npm install
+npm ci
 npm run tauri:dev
 ```
+
+Windows 首次使用推荐运行可审查的一键配置包：
+
+```powershell
+cd narcard-editor
+.\setup-windows.cmd
+.\start-editor-windows.cmd
+```
+
+完整中文说明见 [Tauri 编辑器配置与排错指南](./narcard-editor/README.zh-CN.md) 和 [一键配置包实现说明](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.zh-CN.md)；也可阅读 [英文主指南](./narcard-editor/README.md) 与 [英文实现说明](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.md)。配置包只检查系统前置条件、安装仓库内 npm 依赖并验证前后端构建，不会提权，也不会静默安装系统软件。
 
 Rust 检查命令需要在 `narcard-editor/src-tauri/` 目录执行：
 
