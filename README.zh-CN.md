@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-一个完整的 Astro 暗色哥特风博客模板，保留首页视觉系统、文章浏览、归档、标签、图库、搜索、Markdown 内容页，以及独立的本地 Markdown/LaTeX 编辑器。
+一个完整的 Astro 暗色哥特风博客模板，保留首页视觉系统、文章浏览、沉浸式书籍阅览模式、归档、标签、图库、搜索、Markdown 内容页，以及独立的本地 Markdown/LaTeX 编辑器。
 
 > 本仓库只提供模板代码和中性示例内容，不包含个人文章、私人图片、私人音频或本地开发环境文件。
 >
@@ -14,6 +14,8 @@
 - 暗色哥特风视觉主题
 - 可切换的血红主题
 - 首页文章浏览与详情视图
+- 沉浸式书籍阅览模式与双向幕布过渡
+- 阅览模式文章搜索、标签筛选、持久文字标记与面板尺寸保存
 - 文章归档、标签、图库和搜索入口
 - Markdown 内容集合与文章路由
 - RSS、sitemap、robots.txt
@@ -55,6 +57,12 @@ http://localhost:4321/
 http://localhost:4321/editor.html
 ```
 
+直接打开专注阅览模式：
+
+```text
+http://localhost:4321/read-mode/
+```
+
 ## 构建与预览
 
 ```bash
@@ -92,6 +100,7 @@ NarCard3 由个人利用业余时间维护，不承诺固定响应 SLA；对于�
 NarCard3 采用 Astro 主站、SCSS 样式层和独立 Tauri/Rust 编辑器的组合结构：
 
 - Astro 负责页面路由、构建期数据、SEO、RSS 和内容集合。
+- `/read-mode/` Astro 路由会把同一套 Markdown 内容集合渲染为沉浸式书籍界面；文章索引和标签来自主站数据，无需单独维护。
 - `src/styles/` 集中维护设计令牌、mixins 和共享 Markdown 样式；布局通过顶层 import 接入。
 - `public/editor.html` 是浏览器编辑器入口，保留 File System Access API fallback。
 - `narcard-editor/` 是独立的 Tauri v2 + Rust 桌面编辑器，不参与 Astro 主站构建。
@@ -104,7 +113,7 @@ src/
 ├── content/blog/            # Markdown 示例文章
 ├── data/posts.ts            # 自动生成的首页文章元数据（不要手改）
 ├── layouts/                 # Astro 布局与 SEO 元数据
-├── pages/                   # 首页、博客、归档、标签、搜索等路由
+├── pages/                   # 首页、阅览模式、博客、归档、标签、搜索等路由
 └── styles/                  # CSS、SCSS 令牌、mixins 和增强样式
 
 public/
@@ -166,6 +175,20 @@ src/content/blog/*.md  →  scripts/generate-posts.mjs  →  src/data/posts.ts
 ```bash
 npm run generate:posts
 ```
+
+## 阅览模式
+
+可以直接访问 `/read-mode/`，也可以从首页右侧圆形工具菜单点击打开书籍图标进入。进入和退出阅览模式时，会使用与主站视图切换一致的幕布过渡。
+
+阅览模式由常规 Markdown 内容集合驱动：
+
+- 文章标题、日期、分类、标签和摘要来自主站自动生成的元数据。
+- 文章正文在 Astro 构建时直接从 `src/content/blog/*.md` 渲染。
+- 点击标签会列出所有对应文章；点击文章后会在当前书籍中装入正文，无需离开阅览模式。
+- 左右圆形工具菜单继续提供主站栏目和阅览控制，并有明确的退出入口返回首页。
+- 文字标记、最新标记定位、主题切换、文章滚动、背景音乐和可调整尺寸的阅览索引均会保留。
+
+不要为阅览模式维护第二份文章正文。修改 Markdown 源文件并重新构建后，标准文章页和书籍阅览界面会同时更新。
 
 ## 编辑器
 
