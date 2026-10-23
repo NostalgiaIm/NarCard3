@@ -41,12 +41,12 @@ For the design, security boundaries, and implementation details of the setup pac
 ### General requirements
 
 - Windows 10 version 1803 or later; Windows 11 is recommended
-- Node.js 20.19+ or 22.12+; use a current LTS release when possible
+- Node.js 22.20+ or 24.12+; use the repository `.nvmrc` version for CI parity
 - npm, normally installed with Node.js
 - Stable Rust, Cargo, and rustup
 - Microsoft Edge WebView2 Evergreen Runtime
 
-Node.js 18 is no longer sufficient for the current Vite 7 toolchain.
+Older Node.js 20 releases are no longer sufficient for every dependency in the current lockfiles.
 
 ### Choosing a Rust toolchain
 

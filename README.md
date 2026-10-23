@@ -30,7 +30,7 @@ A complete dark, gothic-inspired Astro blog template with the original visual sy
 
 ## Requirements
 
-- Node.js 20.19+ or 22.12+ (required by the current Vite toolchain)
+- Node.js 22.20+ or 24.12+ (use the version recorded in `.nvmrc` for CI parity)
 - npm
 - A modern JavaScript-enabled browser
 
@@ -64,6 +64,18 @@ npm run preview
 ```
 
 The build output is written to `dist/`. The `dist/` directory is excluded by `.gitignore` and should not normally be committed.
+
+## Continuous integration
+
+GitHub Actions runs three independent quality gates for pushes and pull requests targeting `main` or `Exp`:
+
+- Astro type/content checks, a production site build, and a check that generated `src/data/posts.ts` is committed.
+- A clean install and production build of the Tauri editor frontend using its own lockfile.
+- Linux Tauri system dependencies followed by Rust formatting, Clippy with warnings denied, and locked tests.
+
+Both Node.js jobs read `.nvmrc`, so local development and CI use the same baseline. Dependabot separately monitors the website npm project, editor npm project, Cargo dependencies, and GitHub Actions. Its configuration becomes active after it exists on the repository's default branch.
+
+The repository intentionally does not publish desktop installers automatically yet. Tauri bundling is disabled in `tauri.conf.json`; release automation should only be enabled after package identifiers, icons, signing/notarization, updater policy, and per-platform smoke tests are ready.
 
 ## Code and engineering standards
 

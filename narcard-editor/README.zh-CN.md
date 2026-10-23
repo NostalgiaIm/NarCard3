@@ -41,12 +41,12 @@ npm run tauri:dev
 ### 通用要求
 
 - Windows 10 1803 或更高版本，推荐 Windows 11
-- Node.js 20.19+ 或 22.12+（推荐当前 LTS）
+- Node.js 22.20+ 或 24.12+（建议使用仓库 `.nvmrc` 中与 CI 一致的版本）
 - npm（随 Node.js 安装）
 - Rust stable、Cargo 和 rustup
 - Microsoft Edge WebView2 Evergreen Runtime
 
-Node.js 18 已不足以运行当前 Vite 7 工具链，因此旧文档中的 Node.js 18 要求不再适用。
+当前锁文件中的部分依赖已经不再支持较旧的 Node.js 20，因此旧版本要求不再适用。
 
 ### Rust 工具链选择
 

@@ -25,7 +25,7 @@ narcard-editor/
 PowerShell 脚本首先检查：
 
 1. 当前系统是否为 Windows。
-2. `node.exe` 是否存在、版本是否处于 Vite 7 支持的 `20.19+` 或 `22.12+` 范围。
+2. `node.exe` 是否存在，并满足锁文件基线：Node.js `22.20+` 或 `24.12+`。
 3. `npm.cmd` 是否存在。
 4. `cargo.exe` 和 `rustc.exe` 是否存在。
 5. `rustc -vV` 返回的 host 类型。
