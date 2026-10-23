@@ -14,7 +14,7 @@
     "sync": "astro sync",
     "check": "astro check"
   },
-  "dependencies": { "@astrojs/rss": "^4.0.19", "astro": "^7.3.8" },
-  "devDependencies": { "@astrojs/check": "^0.9.10", "sass": "^1.93.2", "typescript": "^6.0.3" },
+  "dependencies": { "@astrojs/rss": "^4.0.19", "astro": "^7.4.1" },
+  "devDependencies": { "@astrojs/check": "^0.9.11", "sass": "^1.93.2", "typescript": "^6.0.3" },
   "type": "commonjs"
 }
