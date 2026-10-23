@@ -77,6 +77,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Verify required Tauri assets
+        run: test -f src-tauri/icons/icon.png
+
       - name: Install Tauri system dependencies
         run: |
           sudo apt-get update

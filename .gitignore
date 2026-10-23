@@ -17,6 +17,7 @@ CODE_STYLE.md
 *.before-final-*.html
 crop_card.js
 *.png
+!narcard-editor/src-tauri/icons/icon.png
 *.jpg
 *.jpeg
 *.mp3
