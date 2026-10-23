@@ -81,6 +81,12 @@ The repository intentionally does not publish desktop installers automatically y
 
 See [`CODE_STYLE.md`](./CODE_STYLE.md) for the project conventions covering Astro/SCSS organization, frontend formatting, comments, AI-assisted changes, Linguist settings, and pre-commit checks.
 
+Contributions are welcome. Before opening an issue or pull request, read [CONTRIBUTING.md](./CONTRIBUTING.md). Use [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions) for questions, early ideas, showcases, and general conversation. Report suspected vulnerabilities privately according to [SECURITY.md](./SECURITY.md), never in an Issue or Discussion.
+
+NarCard3 is maintained by one person in their available time and has no guaranteed response SLA. Well-formed issues and pull requests are normally triaged within 7 days when possible.
+
+Deferred desktop release work and community milestones are tracked in [ROADMAP.md](./ROADMAP.md). English is the canonical documentation language; designated Chinese counterparts are maintained alongside user-facing guides and checked by `npm run check:docs`.
+
 ## Architecture
 
 NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:
