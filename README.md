@@ -282,7 +282,9 @@ Only commit images, audio, and fonts that you own or are licensed to distribute.
 
 ### Quality gates
 
-GitHub Actions validates the Astro site, editor frontend, and Tauri/Rust project. Before opening a pull request, run the checks relevant to your changes:
+GitHub Actions always validates the Astro site. Pull requests run the editor frontend or Tauri/Rust jobs only when their related paths change; pushes to feature branches are not checked a second time when an open pull request already covers the same commit. A merge to `main` and a manual workflow dispatch still run the complete suite.
+
+This keeps website and documentation pull requests fast while preserving full verification on the protected branch. A skipped editor or Rust job means that its project was not affected, not that CI failed. Before opening a pull request, run the checks relevant to your changes:
 
 ~~~bash
 npm run check:docs

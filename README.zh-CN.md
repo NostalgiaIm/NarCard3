@@ -282,7 +282,9 @@ src/styles/scss-enhancements.scss
 
 ### 质量检查
 
-GitHub Actions 会检查 Astro 主站、编辑器前端和 Tauri/Rust 项目。创建 Pull Request 前，请运行与改动相关的检查：
+GitHub Actions 始终检查 Astro 主站。Pull Request 只有在相关路径发生变化时才运行编辑器前端或 Tauri/Rust 任务；功能分支已有开放 PR 时，普通推送不会再对同一提交重复运行第二套检查。合并进入 `main` 或手动触发工作流时，仍会执行完整检查。
+
+这样可以让网站和文档类 PR 更快，同时保留受保护分支的完整验证。编辑器或 Rust 任务显示为跳过，表示对应项目未受影响，并不代表 CI 失败。创建 Pull Request 前，请运行与改动相关的检查：
 
 ~~~bash
 npm run check:docs
