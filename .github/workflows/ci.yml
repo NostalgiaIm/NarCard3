@@ -2,19 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [main, Exp]
+    branches: [main]
   pull_request:
     branches: [main, Exp]
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect affected projects
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      editor: ${{ steps.filter.outputs.editor }}
+      rust: ${{ steps.filter.outputs.rust }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Detect editor and Rust changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            editor:
+              - 'narcard-editor/src/**'
+              - 'narcard-editor/index.html'
+              - 'narcard-editor/package.json'
+              - 'narcard-editor/package-lock.json'
+              - 'narcard-editor/vite.config.js'
+              - '.nvmrc'
+              - '.github/workflows/ci.yml'
+            rust:
+              - 'narcard-editor/src-tauri/**'
+              - '.github/workflows/ci.yml'
+
   web:
     name: Astro site
     runs-on: ubuntu-latest
@@ -47,6 +76,8 @@ jobs:
 
   editor-frontend:
     name: Tauri editor frontend
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.editor == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -71,6 +102,8 @@ jobs:
 
   rust:
     name: Tauri Rust checks
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.rust == 'true'
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     defaults:

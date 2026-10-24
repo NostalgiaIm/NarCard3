@@ -1,153 +1,139 @@
-# NarCard3
+<p align="center">
+  <img src="./docs/media/narcard3-hero.png" alt="NarCard3 — Where shadows write and silence speaks" width="100%" />
+</p>
 
-[简体中文](./README.zh-CN.md)
+<h1 align="center">NarCard3</h1>
 
-A complete dark, gothic-inspired Astro blog template with the original visual system, article browsing, an immersive book-style reading mode, archives, tags, gallery, search, Markdown content pages, and an integrated local Markdown/LaTeX editor.
+<p align="center">
+  A dark, gothic-inspired Astro journal with an immersive reading room and an optional local Tauri editor.
+</p>
 
-> This repository contains template code and neutral example content. It does not include personal articles, private images, private audio, or local development files.
->
-> Repository: https://github.com/NostalgiaIm/NarCard3
+<p align="center">
+  <a href="./README.zh-CN.md">简体中文</a>
+  ·
+  <a href="#feature-showcase">Feature showcase</a>
+  ·
+  <a href="#quick-start">Quick start</a>
+  ·
+  <a href="#editor">Editor</a>
+  ·
+  <a href="./CONTRIBUTING.md">Contributing</a>
+</p>
 
-## Features
+<p align="center">
+  <a href="https://github.com/NostalgiaIm/NarCard3/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/NostalgiaIm/NarCard3/actions/workflows/ci.yml/badge.svg?branch=Exp" /></a>
+  <img alt="Astro 7" src="https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white" />
+  <img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white" />
+  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/License-MIT-C9A96E" /></a>
+</p>
 
-- Astro static site structure
-- Dark gothic-inspired visual theme
-- Switchable Blood Moon theme
-- Home page article browsing and detail views
-- Immersive book-style reading mode with synchronized curtain transitions
-- Reading-mode article search, tag filtering, persistent text highlights, and saved panel sizing
-- Archives, tags, gallery, and search entry points
-- Markdown content collection and article routes
-- RSS, sitemap, and robots.txt
-- Canonical URLs, Open Graph, Twitter Cards, and JSON-LD metadata
-- SCSS design tokens, mixins, and incremental enhancement styles
-- KaTeX formula rendering
-- Standalone Markdown editor
-- Optional Tauri v2 + Rust desktop editor prototype
-- Formula editor with templates, matrices, colors, fonts, environments, and favorites
-- Source/visual formula editing modes
-- Article switching and draft persistence in the editor
-- Markdown export and main-site import entry points
-- Responsive layout and keyboard interactions
+> NarCard3 is a reusable template with neutral example content. It does not include personal articles, private media, credentials, or machine-specific development files.
 
-## Requirements
+## Why NarCard3?
 
-- Node.js 22.20+ or 24.12+ (use the version recorded in `.nvmrc` for CI parity)
+NarCard3 combines a theatrical visual system with a practical static publishing workflow. The main site provides archives, tags, gallery, search, article routes, RSS, sitemap, and metadata, while the reading room turns the same Markdown collection into a focused book-like experience.
+
+The website stays statically generated with Astro. Authors can work directly in Markdown, use the standalone browser editor, or experiment with the optional Tauri desktop editor without changing the site's content source.
+
+## Feature showcase
+
+This section is intentionally organized as a sequence of small demonstrations. GIFs can be added one feature at a time under the matching heading without restructuring the rest of the README.
+
+### 01 · Gothic home experience
+
+<!-- GIF slot: docs/media/showcase-home.gif -->
+
+- Dark gothic art direction with a switchable Blood Moon theme
+- Orb-based navigation, curtain transitions, ambient motion, and keyboard interactions
+- Home, archive, tags, gallery, search, about, and article views
+
+### 02 · Immersive reading room
+
+<!-- GIF slot: docs/media/showcase-reading-mode.gif -->
+
+- Book-opening animation and high-clarity flattened reading layout
+- Main-site Markdown articles and tags rendered into the same reading interface
+- Article search, tag filtering, in-page text highlights, and latest-highlight navigation
+- Resizable reading index with its dimensions saved locally
+- Curtain transitions when entering or leaving reading mode
+
+### 03 · Markdown publishing workflow
+
+<!-- GIF slot: docs/media/showcase-publishing.gif -->
+
+- Markdown content collection with generated home-page metadata
+- Article routes, RSS, sitemap, robots.txt, canonical URLs, Open Graph, Twitter Cards, and JSON-LD
+- KaTeX rendering and shared Markdown presentation styles
+
+### 04 · Browser and desktop editing
+
+<!-- GIF slot: docs/media/showcase-editor.gif -->
+
+- Standalone Markdown/LaTeX browser editor
+- Formula templates, matrices, colors, fonts, environments, and favorites
+- Optional Tauri v2 + Rust desktop editor with project validation, backups, image processing, and Git publishing
+
+When adding a GIF, store it in `docs/media/` and replace the corresponding hidden comment with:
+
+~~~html
+<p align="center">
+  <img src="./docs/media/showcase-example.gif" alt="Short description of the demonstrated feature" width="100%" />
+</p>
+~~~
+
+Keep GIFs focused, cropped, and reasonably compressed so the repository page remains quick to load.
+
+## Quick start
+
+### Requirements
+
+- Node.js 22.20+ or 24.12+; use the version in `.nvmrc` for CI parity
 - npm
 - A modern JavaScript-enabled browser
 
-## Run locally
+### Run locally
 
-From the project root:
-
-```bash
+~~~bash
+git clone https://github.com/NostalgiaIm/NarCard3.git
+cd NarCard3
 npm ci
 npm run dev
-```
+~~~
 
-Open the site:
+Useful local routes:
 
-```text
-http://localhost:4321/
-```
+| Route | Purpose |
+| --- | --- |
+| `http://localhost:4321/` | Main website |
+| `http://localhost:4321/read-mode/` | Immersive reading room |
+| `http://localhost:4321/editor.html` | Standalone browser editor |
 
-Open the local editor:
+### Validate and build
 
-```text
-http://localhost:4321/editor.html
-```
-
-Open the focused reading mode directly:
-
-```text
-http://localhost:4321/read-mode/
-```
-
-## Build and preview
-
-```bash
+~~~bash
+npm run check:docs
 npm run check
 npm run build
 npm run preview
-```
+~~~
 
-The build output is written to `dist/`. The `dist/` directory is excluded by `.gitignore` and should not normally be committed.
+The production output is written to `dist/` and is intentionally excluded from Git.
 
-## Continuous integration
+## Content workflow
 
-GitHub Actions runs three independent quality gates for pushes and pull requests targeting `main` or `Exp`:
+Markdown is the single source of truth for articles.
 
-- Astro type/content checks, a production site build, and a check that generated `src/data/posts.ts` is committed.
-- A clean install and production build of the Tauri editor frontend using its own lockfile.
-- Linux Tauri system dependencies followed by Rust formatting, Clippy with warnings denied, and locked tests.
+~~~text
+src/content/blog/*.md
+        │
+        ├── Astro content collection ──> standard article pages
+        ├── reading mode rendering ────> /read-mode/
+        └── scripts/generate-posts.mjs ─> src/data/posts.ts
+~~~
 
-Both Node.js jobs read `.nvmrc`, so local development and CI use the same baseline. Dependabot separately monitors the website npm project, editor npm project, Cargo dependencies, and GitHub Actions. Its configuration becomes active after it exists on the repository's default branch.
+Create an article in `src/content/blog/`:
 
-The repository intentionally does not publish desktop installers automatically yet. Tauri bundling is disabled in `tauri.conf.json`; release automation should only be enabled after package identifiers, icons, signing/notarization, updater policy, and per-platform smoke tests are ready.
-
-## Code and engineering standards
-
-See [`CODE_STYLE.md`](./CODE_STYLE.md) for the project conventions covering Astro/SCSS organization, frontend formatting, comments, AI-assisted changes, Linguist settings, and pre-commit checks.
-
-Contributions are welcome. Before opening an issue or pull request, read [CONTRIBUTING.md](./CONTRIBUTING.md). Use [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions) for questions, early ideas, showcases, and general conversation. Report suspected vulnerabilities privately according to [SECURITY.md](./SECURITY.md), never in an Issue or Discussion.
-
-NarCard3 is maintained by one person in their available time and has no guaranteed response SLA. Well-formed issues and pull requests are normally triaged within 7 days when possible.
-
-Deferred desktop release work and community milestones are tracked in [ROADMAP.md](./ROADMAP.md). English is the canonical documentation language; designated Chinese counterparts are maintained alongside user-facing guides and checked by `npm run check:docs`.
-
-## Architecture
-
-NarCard3 is organized as an Astro site, a shared SCSS layer, and an independent Tauri/Rust editor:
-
-- Astro owns routes, build-time data, SEO, RSS, and content collections.
-- The `/read-mode/` Astro route renders the same Markdown collection into an immersive book interface; its article index and tags are generated from the main-site data rather than maintained separately.
-- `src/styles/` owns design tokens, mixins, and shared Markdown enhancements; layouts import the SCSS layer at the top level.
-- `public/editor.html` remains the browser editor and keeps its File System Access API fallback.
-- `narcard-editor/` is an independent Tauri v2 + Rust desktop editor and is not part of the Astro site build.
-
-## Project structure
-
-```text
-src/
-├── components/              # Global, blog, and UI components
-├── content/blog/            # Markdown example articles
-├── data/posts.ts            # Generated home page metadata (do not edit manually)
-├── layouts/                 # Astro layouts and SEO metadata
-├── pages/                   # Home, reading mode, blog, archive, tag, search, and utility routes
-└── styles/                  # CSS, SCSS tokens, mixins, and enhancements
-
-public/
-└── editor.html              # Standalone Markdown/LaTeX editor
-
-narcard-editor/              # Optional Tauri v2 + Rust desktop editor prototype
-├── README.md                 # Primary English setup and troubleshooting guide
-├── README.zh-CN.md           # Simplified Chinese setup guide
-├── docs/                     # English and Chinese setup implementation notes
-├── setup-windows.cmd         # Auditable first-run setup entry point
-├── doctor-windows.cmd        # Read-only Windows environment diagnosis
-├── start-editor-windows.cmd  # Desktop editor launcher
-├── scripts/                  # PowerShell setup implementation
-├── src/                      # Frontend bridge, interactions, and styles
-└── src-tauri/                # Rust commands, permissions, and Tauri config
-
-astro.config.mjs             # Astro configuration and site URL
-package.json                 # Scripts and dependencies
-scripts/generate-posts.mjs   # Generates home-page metadata from Markdown
-```
-
-## Adding articles
-
-### Markdown articles
-
-Place articles in:
-
-```text
-src/content/blog/
-```
-
-Use frontmatter such as:
-
-```md
+~~~md
 ---
 title: A New Example Entry
 description: A short description for this article.
@@ -158,202 +144,184 @@ draft: false
 ---
 
 Write your article here.
-```
+~~~
 
-### Generated home page data
-
-`src/data/posts.ts` is generated automatically from the Markdown collection before every production build:
-
-```text
-src/content/blog/*.md  →  scripts/generate-posts.mjs  →  src/data/posts.ts
-```
-
-Do not edit `src/data/posts.ts` manually. Add or update Markdown frontmatter instead. The generator reads `title`, `description`, `pubDate` (or `date`), `tags`, `category`, `cover`, `coverAlt`, `coverPosition`, `variant`, and `draft`. Draft articles are excluded from the home page data.
+`src/data/posts.ts` is generated before each production build. Do not edit it manually. The generator reads `title`, `description`, `pubDate` (or `date`), `tags`, `category`, `cover`, `coverAlt`, `coverPosition`, `variant`, and `draft`. Draft articles are excluded.
 
 Run the generator manually when needed:
 
-```bash
+~~~bash
 npm run generate:posts
-```
+~~~
 
 ## Reading mode
 
-Open `/read-mode/` directly or use the open-book button in the home page's right-side orb menu. Entering and leaving reading mode uses the same curtain transition as the main-site view changes.
+Open `/read-mode/` directly or use the open-book button in the main site's right orb menu.
 
-Reading mode is driven by the regular Markdown collection:
-
-- Article titles, dates, categories, tags, and summaries come from generated main-site metadata.
+- Article metadata is read from the generated main-site data.
 - Article bodies are rendered from `src/content/blog/*.md` during the Astro build.
-- Selecting a tag lists every matching article; selecting an article loads it into the book without leaving reading mode.
-- The left and right orb menus retain access to the main-site sections and reading controls, while explicit exit controls return to the home page.
-- Text highlighting, latest-highlight navigation, theme switching, article scrolling, background music, and the resizable reading index remain available.
+- Selecting a tag lists every matching article.
+- Selecting an article loads it into the current book without leaving reading mode.
+- Left and right orb menus retain access to site sections and reading controls.
+- Explicit exit controls return to the main site through the shared curtain transition.
+- Text highlighting, latest-highlight navigation, theme switching, scrolling, background music, and reading-index resizing remain available.
 
-Do not maintain a second copy of article content for reading mode. Updating the Markdown source and rebuilding the site updates both the standard article route and the reading interface.
+Do not maintain a second copy of article content for reading mode. Updating Markdown and rebuilding updates both article presentations.
 
 ## Editor
 
-Open:
+### Browser editor
 
-```text
-/editor.html
-```
-
-The editor includes:
+Open `/editor.html`. It supports:
 
 - Live Markdown preview
-- Article metadata editing
+- Article metadata editing and switching
 - Draft persistence
-- Article switching
 - Markdown import and export
-- LaTeX formula editing
-- Formula templates and matrix tools
-- Formula favorites
+- LaTeX source and visual editing
+- Formula templates, matrices, favorites, colors, fonts, and environments
 - Image/document formula import entry points
-- One-click copying of main-site code
-- One-click import after a directory has been selected
+- Main-site code copying and directory-based import entry points
 
-The browser File System Access API requires the user to explicitly select a directory and grant permission. The template does not bypass browser permissions or upload local files in the background.
+The File System Access API always requires explicit directory selection and browser permission. NarCard3 does not bypass these permissions or upload local files in the background.
 
-### Optional Tauri editor
+### Optional Tauri desktop editor
 
-The repository also contains an independent desktop editor prototype in `narcard-editor/`. It is deliberately kept separate from the Astro root project so the browser editor and the website remain usable while the native workflow is being tested.
+The independent `narcard-editor/` project adds native project access while keeping the website and browser editor usable on their own.
 
-The Tauri prototype currently supports:
+<details>
+<summary>Desktop editor capabilities and setup</summary>
 
-- Selecting and validating an Astro project directory
-- Checking for `src/data/posts.ts`, `src/pages/index.astro`, and `src/content/blog`
-- Reading home-page article counts, source contents, and version fingerprints
-- Validating slugs and real ISO dates before writing
-- Detecting duplicate slugs and external file changes
-- Writing a new article into the home-page article system
-- Listing, reading, creating, and overwriting `src/content/blog/*.md`
-- Restricting Markdown filenames to safe slugs and rejecting traversal, symlinks, and oversized files
-- Creating `.bak` backups before replacing source files
-- Using temporary files during replacement, including Windows handling
-- Basic Markdown-to-HTML conversion with HTML escaping
-- Markdown export when running in browser preview mode
-- Automatic WebP cover compression in the Tauri desktop editor
-- Git commit and push from the Tauri desktop editor
+The prototype supports project validation, safe slug and date checks, duplicate detection, external-change detection, Markdown file creation and replacement, `.bak` backups, temporary-file replacement, basic Markdown preview, WebP cover compression, and Git commit/push workflows.
 
-Markdown is the single article source for the site. The generated `src/data/posts.ts` file is a build-time compatibility layer for the home-page data shape; it is not an independent authoring system. Git publishing modifies the local repository and pushes to the configured remote; configure Git identity and credentials before using it.
+Install and run:
 
-To install and run the desktop prototype:
-
-```bash
+~~~bash
 cd narcard-editor
 npm ci
 npm run tauri:dev
-```
+~~~
 
-On Windows, the recommended first-run path is the auditable one-click setup:
+Recommended Windows setup:
 
-```powershell
+~~~powershell
 cd narcard-editor
 .\setup-windows.cmd
 .\start-editor-windows.cmd
-```
+~~~
 
-See the [complete Tauri editor setup and troubleshooting guide](./narcard-editor/README.md) and the [one-click setup implementation notes](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.md). Chinese versions are also available in the [editor guide](./narcard-editor/README.zh-CN.md) and [implementation notes](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.zh-CN.md). The setup checks prerequisites, installs only repository-local npm dependencies, and verifies both frontend and Rust builds; it does not elevate privileges or install system packages silently.
+Windows development requires Rust/Cargo, Microsoft C++ Build Tools, and WebView2. Test write operations against a disposable project copy first.
 
-Rust checks can be run from `narcard-editor/src-tauri/`:
+Documentation:
 
-```bash
-cargo fmt --check
-cargo test
-cargo check
-```
+- [Desktop editor guide](./narcard-editor/README.md)
+- [中文桌面编辑器指南](./narcard-editor/README.zh-CN.md)
+- [One-click setup implementation](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.md)
+- [一键配置实现说明](./narcard-editor/docs/ONE_CLICK_SETUP_IMPLEMENTATION.zh-CN.md)
 
-Before testing writes, use a copy of an Astro project rather than the only working copy. The desktop editor creates backups, but testing against a disposable project makes rollback and failure testing safer. Windows development also requires Rust/Cargo, Microsoft C++ Build Tools, and WebView2.
+</details>
 
-## SCSS
+## Architecture
 
-The project uses Sass/SCSS as an incremental design layer:
+~~~text
+src/
+├── components/              # Global, blog, and UI components
+├── content/blog/            # Markdown articles
+├── data/posts.ts            # Generated article metadata
+├── layouts/                 # Astro layouts and SEO metadata
+├── pages/                   # Main site, reading mode, blog, and utility routes
+└── styles/                  # SCSS tokens, mixins, and enhancements
 
-```text
+public/
+└── editor.html              # Standalone Markdown/LaTeX editor
+
+docs/media/                  # README hero image and future showcase GIFs
+
+narcard-editor/
+├── src/                     # Desktop editor frontend
+├── src-tauri/               # Rust commands, permissions, and Tauri config
+├── scripts/                 # Windows setup implementation
+└── docs/                    # Desktop setup documentation
+~~~
+
+Responsibilities:
+
+- Astro owns routes, build-time data, SEO, RSS, and content collections.
+- `/read-mode/` renders the same content collection into the book interface.
+- `src/styles/` owns shared design tokens and Markdown enhancements.
+- `public/editor.html` remains the browser editor.
+- `narcard-editor/` remains an independent Tauri/Rust project.
+
+## Configuration and maintenance
+
+### Site URL and SEO
+
+Before deployment, replace the placeholder in `astro.config.mjs`:
+
+~~~js
+site: 'https://your-domain.example'
+~~~
+
+It controls canonical URLs, RSS links, sitemap entries, robots.txt, JSON-LD, and Open Graph URLs.
+
+### Styling
+
+The incremental Sass layer lives in:
+
+~~~text
 src/styles/_tokens.scss
 src/styles/_mixins.scss
 src/styles/scss-enhancements.scss
-```
+~~~
 
-The existing `global.css` is intentionally preserved. SCSS provides scoped enhancements for shared blog and Markdown layouts, reducing migration risk.
+Prefer shared SCSS for reusable styles and keep page-specific behavior close to its Astro page or component.
 
-## Maintenance checklist
+### Media
 
-- Keep build-time page logic and data decisions in Astro frontmatter or the relevant component data section.
-- Put new shared styles in `src/styles/*.scss` instead of creating duplicate page-level CSS.
-- Do not change stable runtime boundaries only to influence language statistics.
-- Run `npm run check` and `npm run build` after Astro or SCSS changes.
-- After Tauri changes, also run `cargo test` and `cargo check` from `narcard-editor/src-tauri/`.
-- Before committing, remove build products, debug logs, and dead code; confirm `git status` does not include `node_modules` or `target`.
+Only commit images, audio, and fonts that you own or are licensed to distribute. Remove sensitive EXIF metadata when appropriate. Runtime media belongs under `public/images/` or `public/audio/`; README demonstrations belong under `docs/media/`.
 
-## SEO and site configuration
+### Quality gates
 
-Before production deployment, update the site URL in `astro.config.mjs`:
+GitHub Actions always validates the Astro site. Pull requests run the editor frontend or Tauri/Rust jobs only when their related paths change; pushes to feature branches are not checked a second time when an open pull request already covers the same commit. A merge to `main` and a manual workflow dispatch still run the complete suite.
 
-```js
-site: 'https://your-domain.example'
-```
+This keeps website and documentation pull requests fast while preserving full verification on the protected branch. A skipped editor or Rust job means that its project was not affected, not that CI failed. Before opening a pull request, run the checks relevant to your changes:
 
-This value affects:
+~~~bash
+npm run check:docs
+npm run check
+npm run build
+~~~
 
-- Canonical URLs
-- RSS links
-- Sitemap
-- robots.txt
-- JSON-LD
-- Open Graph URLs
+For Tauri changes, also run the Rust formatting, linting, and test commands described in the desktop editor guide.
 
-The template uses `https://example.com` as a placeholder.
+<details>
+<summary>Publishing checklist</summary>
 
-## Media assets
+- Confirm `git status` does not include `node_modules`, `dist`, `.astro`, `target`, backups, logs, private articles, or unlicensed media.
+- Confirm generated `src/data/posts.ts` matches the Markdown frontmatter.
+- Review the configured site URL and public metadata.
+- Keep build products out of commits.
+- Test file-writing editor changes against a project copy.
 
-The template does not include private media. Only add images, audio, and fonts that you own or are explicitly licensed to use. Consider removing EXIF and other metadata from images before publishing.
+</details>
 
-Suggested directories:
+## Project documentation
 
-```text
-public/images/
-public/audio/
-```
+- [Code and engineering standards](./CODE_STYLE.md)
+- [Contributing guide](./CONTRIBUTING.md)
+- [Roadmap](./ROADMAP.md)
+- [Security policy](./SECURITY.md)
+- [GitHub Discussions](https://github.com/NostalgiaIm/NarCard3/discussions)
 
-## Publishing to GitHub
+NarCard3 is maintained by one person in their available time and has no guaranteed response SLA. Well-formed issues and pull requests are normally triaged within seven days when possible. English is the canonical documentation language; designated Chinese documents are maintained alongside user-facing guides.
 
-The template includes a `.gitignore` that excludes:
+## Optional integrations
 
-```text
-node_modules/
-dist/
-.astro/
-.vscode/
-*.bak
-*.prev.html
-*.before-final-*.html
-Private media files
-```
+- **Pagefind:** the template keeps its existing search entry point and does not force a Pagefind dependency.
+- **Giscus:** comments are not connected to a repository or Discussion category by default.
 
-Before the first commit, review the staged files:
-
-```bash
-git status
-git ls-files
-```
-
-Make sure local paths, private articles, backup files, build caches, and unlicensed media are not included.
-
-This documentation does not create a Git remote, push code, or add collaborators automatically.
-
-## Features not enabled by default
-
-### Pagefind
-
-The template keeps its existing search entry point and does not force Pagefind into the project. Add it separately if full-text search is needed for your deployment and content size.
-
-### Giscus
-
-The template is not connected to any GitHub Discussions repository or comment configuration. Configure your own public repository and Discussion category before adding comments.
+Configure these integrations for your own deployment before enabling them.
 
 ## License
 
-This project is released under the MIT License. See [LICENSE](./LICENSE).
-
-Third-party dependencies, fonts, images, audio, and external services may have separate license terms. Review them before use.
+NarCard3 is released under the [MIT License](./LICENSE). Third-party dependencies, fonts, images, audio, and services may use separate licenses; review their terms before distribution.
