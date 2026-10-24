@@ -17,6 +17,7 @@ LOCAL_TECHNICAL_DOCS.md
 crop_card.js
 *.png
 !narcard-editor/src-tauri/icons/icon.png
+!docs/media/narcard3-hero.png
 *.jpg
 *.jpeg
 *.mp3
