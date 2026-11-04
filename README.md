@@ -87,7 +87,7 @@ Keep GIFs focused, cropped, and reasonably compressed so the repository page rem
 
 ### Requirements
 
-- Node.js 22.20+ or 24.12+; use the version in `.nvmrc` for CI parity
+- Node.js 22.23.4+ or 24.12+; use the version in `.nvmrc` for CI parity
 - npm
 - A modern JavaScript-enabled browser
 
